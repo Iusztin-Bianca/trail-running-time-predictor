@@ -10,6 +10,7 @@ This script mirrors the logic in azure_functions/strava_monthly_update/__init__.
 import logging
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
 
 from app.data_ingestion.strava_client import StravaClient
 from app.data_ingestion.data_ingestion_pipeline import DataIngestionPipeline
@@ -82,6 +83,7 @@ def main() -> None:
         pipeline = DataIngestionPipeline(
             strava_client=strava_client,
             feature_extractor=feature_extractor,
+            output_path=Path("/tmp/strava_training_features.parquet"),
             min_elevation_gain_m=100.0,
             blob_manager=blob_manager,
             save_raw_activities=True,
