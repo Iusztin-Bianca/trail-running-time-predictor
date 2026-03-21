@@ -1,0 +1,156 @@
+{
+  "timestamp": "2026-03-20T19:53:09.268225",
+  "dataset": {
+    "total_segments": 2380,
+    "total_activities": 62,
+    "avg_segments_per_race": 38.4,
+    "avg_segment_duration_sec": 216.6,
+    "avg_race_duration_sec": "activity_id\n8940728729     177.6\n8967580542     148.6\n9019799632     138.1\n9025304963      91.6\n9067983184     131.9\n               ...  \n17171419980    277.4\n17316524499    173.8\n17470087379    184.9\n17564269285    690.7\n17716897022    188.9\nName: segment_time_sec, Length: 62, dtype: float64"
+  },
+  "models": {
+    "ridge": {
+      "best_params": {
+        "alpha": 10.0
+      },
+      "cv_metrics_race": {
+        "note": "Cross validation metrics(race level) The model is trained on older activities and validated on the recent activities(TimeSeriesSplit)MAE/RMSE measured in seconds, MAPE in percentage, R2 is between 0 and 1",
+        "mae": 956.9761245007803,
+        "rmse": 1325.8999250068125,
+        "mape": 11.037976583868641,
+        "r2": 0.905204991299264
+      },
+      "train_metrics_race": {
+        "note": "Metrics on the final training set(race-level): segment prediction are added upto obtain the race prediction. Low error on training set/ High error on test setcan be a sign of overfitting!",
+        "mae": 681.2544320066727,
+        "rmse": 955.6312023124267,
+        "mape": 9.423142875911518,
+        "r2": 0.9639286117175072
+      },
+      "train_metrics_segment": {
+        "note": "Metrics computed at segment level(High value- acceptable because there are a lot ofshort segments in each race - the value is not really relevant) MAE/RMSE measured in seconds, R2 is between 0 and 1.",
+        "mae": 50.72395493545674,
+        "rmse": 81.79867845478843,
+        "mape": 39.288128791898316,
+        "r2": 0.8836884221610943
+      },
+      "test_metrics_race": {
+        "note": "Metrics on the final training set (race-level, unseen running activities): segment predictions are added up for each activity and compared with the actual race time of the activity This is the main evaluation metric",
+        "mae": 520.8027022249013,
+        "rmse": 659.1321498527742,
+        "mape": 6.762370051555989,
+        "r2": 0.9615903007894441
+      },
+      "shap_importance": {
+        "note": "The importance of each feature calculated with SHAP (SHapley Additive exPlanations) Each value represents the average of the absolute SHAP values \u200b\u200bover the entire dataset(in seconds)Interpretation: a feature that has a shap value of 60 means that on average, that feature change the segment time prediction by \u00b160 secunde. The features are sorted descending based on the impact.",
+        "feature_descriptions": {
+          "segment_energy_cost": "Minetti energy cost (J/kg): 155.4*g^5 - 30.4*g^4 - 43.3*g^3 + 46.3*g^2 + 19.5*g + 3.6, multiplied by distance \u2014 validated biomechanical formula for running on slopes",
+          "elevation_loss_m": "Net elevation loss in segment (m)",
+          "intensity_level": "Parent activity intensity (0=recovery, 1=training, 2=race) \u2014 captures intentional effort differences",
+          "elevation_gain_m": "Net elevation gain in segment (m)",
+          "segment_distance_m": "Segment length (m)",
+          "uphill_cost": "Uphill cost: distance * (1 + 6 * gradient) \u2014 0 for non-uphill segments",
+          "avg_elevation": "Mean elevation of segment (m above sea level)",
+          "avg_gradient": "Mean absolute gradient of segment (0.1 = 10%) \u2014 unsigned",
+          "std_gradient": "Standard deviation of gradient in segment \u2014 measures terrain irregularity",
+          "max_downhill_gradient": "Max downhill gradient in segment (0 for non-downhill segments)",
+          "cumulative_elevation": "Cumulative elevation gain from activity start to end of this segment (m) \u2014 proxy for accumulated fatigue",
+          "downhill_cost": "Downhill cost: distance * (1 + 6 * |gradient|) \u2014 0 for non-downhill segments",
+          "max_uphill_gradient": "Max uphill gradient in segment (0 for non-uphill segments)",
+          "is_steep_downhill": "1 if segment descends steeply (gradient >= 30%), else 0 \u2014 marks technical descents",
+          "is_steep_uphill": "1 if segment climbs steeply (gradient >= 30%), else 0 \u2014 marks sections where athletes walk"
+        },
+        "values": {
+          "segment_energy_cost": 55.98622691153228,
+          "elevation_loss_m": 54.6073625121747,
+          "intensity_level": 37.02421471179482,
+          "elevation_gain_m": 36.2923135821073,
+          "segment_distance_m": 32.07732677255387,
+          "uphill_cost": 30.642466943889534,
+          "avg_elevation": 26.793561735513297,
+          "avg_gradient": 14.918341893216699,
+          "std_gradient": 12.408292928271067,
+          "max_downhill_gradient": 8.697499976061588,
+          "cumulative_elevation": 5.52250607936446,
+          "downhill_cost": 3.30659313479463,
+          "max_uphill_gradient": 2.689086947752289,
+          "is_steep_downhill": 1.168482721081349,
+          "is_steep_uphill": 0.2680003948812402
+        }
+      }
+    },
+    "xgboost": {
+      "best_params": {
+        "learning_rate": 0.03,
+        "max_depth": 3,
+        "min_child_weight": 1,
+        "n_estimators": 200
+      },
+      "cv_metrics_race": {
+        "note": "Cross validation metrics(race level) The model is trained on older activities and validated on the recent activities(TimeSeriesSplit)MAE/RMSE measured in seconds, MAPE in percentage, R2 is between 0 and 1",
+        "mae": 1050.1428527832031,
+        "rmse": 1564.9554738430375,
+        "mape": 11.260679959999292,
+        "r2": 0.8906706490761629
+      },
+      "train_metrics_race": {
+        "note": "Metrics on the final training set(race-level): segment prediction are added upto obtain the race prediction. Low error on training set/ High error on test setcan be a sign of overfitting!",
+        "mae": 441.332440625,
+        "rmse": 580.4195826393695,
+        "mape": 6.045284594816474,
+        "r2": 0.9866934237294102
+      },
+      "train_metrics_segment": {
+        "note": "Metrics computed at segment level(High value- acceptable because there are a lot ofshort segments in each race - the value is not really relevant) MAE/RMSE measured in seconds, R2 is between 0 and 1.",
+        "mae": 35.61655783915471,
+        "rmse": 63.148844510959535,
+        "mape": 25.102556598112148,
+        "r2": 0.9306795793595832
+      },
+      "test_metrics_race": {
+        "note": "Metrics on the final training set (race-level, unseen running activities): segment predictions are added up for each activity and compared with the actual race time of the activity This is the main evaluation metric",
+        "mae": 705.3914095052083,
+        "rmse": 756.0388976434639,
+        "mape": 10.35988375699465,
+        "r2": 0.9494659395003108
+      },
+      "shap_importance": {
+        "note": "The importance of each feature calculated with SHAP (SHapley Additive exPlanations) Each value represents the average of the absolute SHAP values \u200b\u200bover the entire dataset(in seconds)Interpretation: a feature that has a shap value of 60 means that on average, that feature change the segment time prediction by \u00b160 secunde. The features are sorted descending based on the impact.",
+        "feature_descriptions": {
+          "segment_energy_cost": "Minetti energy cost (J/kg): 155.4*g^5 - 30.4*g^4 - 43.3*g^3 + 46.3*g^2 + 19.5*g + 3.6, multiplied by distance \u2014 validated biomechanical formula for running on slopes",
+          "segment_distance_m": "Segment length (m)",
+          "elevation_gain_m": "Net elevation gain in segment (m)",
+          "intensity_level": "Parent activity intensity (0=recovery, 1=training, 2=race) \u2014 captures intentional effort differences",
+          "uphill_cost": "Uphill cost: distance * (1 + 6 * gradient) \u2014 0 for non-uphill segments",
+          "avg_elevation": "Mean elevation of segment (m above sea level)",
+          "downhill_cost": "Downhill cost: distance * (1 + 6 * |gradient|) \u2014 0 for non-downhill segments",
+          "elevation_loss_m": "Net elevation loss in segment (m)",
+          "max_downhill_gradient": "Max downhill gradient in segment (0 for non-downhill segments)",
+          "std_gradient": "Standard deviation of gradient in segment \u2014 measures terrain irregularity",
+          "avg_gradient": "Mean absolute gradient of segment (0.1 = 10%) \u2014 unsigned",
+          "cumulative_elevation": "Cumulative elevation gain from activity start to end of this segment (m) \u2014 proxy for accumulated fatigue",
+          "max_uphill_gradient": "Max uphill gradient in segment (0 for non-uphill segments)",
+          "is_steep_uphill": "1 if segment climbs steeply (gradient >= 30%), else 0 \u2014 marks sections where athletes walk",
+          "is_steep_downhill": "1 if segment descends steeply (gradient >= 30%), else 0 \u2014 marks technical descents"
+        },
+        "values": {
+          "segment_energy_cost": 74.55233764648438,
+          "segment_distance_m": 39.196380615234375,
+          "elevation_gain_m": 24.345603942871094,
+          "intensity_level": 20.01445198059082,
+          "uphill_cost": 17.12283706665039,
+          "avg_elevation": 10.241310119628906,
+          "downhill_cost": 9.0094633102417,
+          "elevation_loss_m": 8.889448165893555,
+          "max_downhill_gradient": 6.595365047454834,
+          "std_gradient": 6.481098175048828,
+          "avg_gradient": 6.3457746505737305,
+          "cumulative_elevation": 3.62699294090271,
+          "max_uphill_gradient": 2.844977617263794,
+          "is_steep_uphill": 0.011503222398459911,
+          "is_steep_downhill": 0.0
+        }
+      }
+    }
+  },
+  "best_model": "ridge"
+}

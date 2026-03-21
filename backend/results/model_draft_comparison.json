@@ -1,0 +1,169 @@
+{
+  "timestamp": "2026-03-16T16:29:10.930551",
+  "dataset": {
+    "total_segments": 2380,
+    "total_activities": 62,
+    "log_transform_target": false
+  },
+  "models": {
+    "ridge": {
+      "best_params": {
+        "alpha": 10.0
+      },
+      "cv_metrics_race": {
+        "note": "Metrici medii pe folduri de cross-validare (TimeSeriesSplit, race-level). Modelul e antrenat pe activitati mai vechi si evaluat pe activitati mai noi. MAE/RMSE in secunde, MAPE in procente, R2 intre 0 si 1.",
+        "mae": 953.2101069858043,
+        "rmse": 1345.926551896419,
+        "mape": 10.281769865310494,
+        "r2": 0.9038290774112647
+      },
+      "train_metrics_race": {
+        "note": "Metrici pe setul de antrenament (race-level): predictiile per segment sunt sumate per activitate. Valorile mult mai bune decat test indica overfitting.",
+        "mae": 666.1854587502312,
+        "rmse": 932.8817294827967,
+        "mape": 9.098363171183042,
+        "r2": 0.9651938754736367
+      },
+      "train_metrics_segment": {
+        "note": "Metrici pe setul de antrenament la nivel de segment individual. MAE/RMSE in secunde, MAPE in procente, R2 intre 0 si 1.",
+        "mae": 50.326143861442546,
+        "rmse": 80.79956069192973,
+        "mape": 39.26534304417164,
+        "r2": 0.8870382887722227
+      },
+      "test_metrics_race": {
+        "note": "Metrici pe setul de test (race-level, activitati nevazute): predictiile per segment sunt sumate per activitate si comparate cu timpul real de cursa. Aceasta e metrica principala de evaluare.",
+        "mae": 459.8583535073082,
+        "rmse": 573.3968675260425,
+        "mape": 6.787928939393509,
+        "r2": 0.9413545772635965
+      },
+      "test_metrics_segment": {
+        "note": "Metrici pe setul de test la nivel de segment individual. MAPE poate fi mare (segmente scurte au timp mic => erori relative mari).",
+        "mae": 48.3632076868501,
+        "rmse": 73.53252862053436,
+        "mape": 28.858844691276868,
+        "r2": 0.9027354848291809
+      },
+      "shap_importance": {
+        "note": "Importanta fiecarui feature calculata cu SHAP (SHapley Additive exPlanations). Fiecare valoare reprezinta media valorilor absolute SHAP pe tot datasetul, exprimata in secunde. Interpretare: un feature cu valoarea 60 inseamna ca, in medie, prezenta acelui feature schimba predictia timpului de segment cu \u00b160 secunde. Featuri sortate descrescator dupa impact.",
+        "feature_descriptions": {
+          "segment_energy_cost": "Costul energetic Minetti (J/kg): 155.4*g^5 - 30.4*g^4 - 43.3*g^3 + 46.3*g^2 + 19.5*g + 3.6, inmultit cu distanta \u2014 formula biomecanica validata pentru alergare pe panta",
+          "elevation_loss_m": "Coborare bruta in segment (m)",
+          "intensity_level": "Intensitatea activitatii parinte (0=recuperare, 1=antrenament, 2=cursa) \u2014 captureaza diferentele de efort intentionat",
+          "elevation_gain_m": "Urcare bruta in segment (m)",
+          "uphill_cost": "Cost de urcare: distance * (1 + 6 * gradient) \u2014 0 pentru segmente fara urcare",
+          "segment_distance_m": "Lungimea segmentului (m)",
+          "avg_elevation": "Altitudinea medie a segmentului (m deasupra nivelului marii)",
+          "avg_gradient": "Panta medie absoluta a segmentului (0.1 = 10%) \u2014 nu are semn",
+          "std_gradient": "Deviatia standard a pantei in segment \u2014 masoara neregularitatea terenului",
+          "max_downhill_gradient": "Panta maxima de coborare din segment (0 pentru segmente non-downhill)",
+          "cumulative_elevation": "Urcare cumulativa de la startul activitatii pana la finalul acestui segment (m) \u2014 aproximeaza oboseala acumulata",
+          "downhill_cost": "Cost de coborare: distance * (1 + 6 * |gradient|) \u2014 0 pentru segmente fara coborare",
+          "max_uphill_gradient": "Panta maxima de urcare din segment (0 pentru segmente non-uphill)",
+          "is_steep_downhill": "1 daca segmentul coboara abrupt (gradient >= 30%), altfel 0 \u2014 marcheaza coborarile tehnice",
+          "is_steep_uphill": "1 daca segmentul urca abrupt (gradient >= 30%), altfel 0 \u2014 marcheaza sectiunile unde atletii merg pe jos"
+        },
+        "values": {
+          "segment_energy_cost": 61.155384814763806,
+          "elevation_loss_m": 57.37299098321273,
+          "intensity_level": 35.9137239568261,
+          "elevation_gain_m": 34.19278242552769,
+          "uphill_cost": 29.35889281312333,
+          "segment_distance_m": 27.2929263977075,
+          "avg_elevation": 25.727554856278715,
+          "avg_gradient": 13.953036239641738,
+          "std_gradient": 10.675104240357404,
+          "max_downhill_gradient": 9.27252409773756,
+          "cumulative_elevation": 6.027548396953069,
+          "downhill_cost": 4.363870069269862,
+          "max_uphill_gradient": 2.6048257901885083,
+          "is_steep_downhill": 1.0137134295536752,
+          "is_steep_uphill": 0.14224390733151646
+        }
+      }
+    },
+    "xgboost": {
+      "best_params": {
+        "learning_rate": 0.05,
+        "max_depth": 4,
+        "min_child_weight": 3,
+        "n_estimators": 200,
+        "subsample": 1.0
+      },
+      "cv_metrics_race": {
+        "note": "Metrici medii pe folduri de cross-validare (TimeSeriesSplit, race-level). Modelul e antrenat pe activitati mai vechi si evaluat pe activitati mai noi. MAE/RMSE in secunde, MAPE in procente, R2 intre 0 si 1.",
+        "mae": 964.209535888672,
+        "rmse": 1361.0279862983482,
+        "mape": 10.16053663990389,
+        "r2": 0.8885804461687397
+      },
+      "train_metrics_race": {
+        "note": "Metrici pe setul de antrenament (race-level): predictiile per segment sunt sumate per activitate. Valorile mult mai bune decat test indica overfitting.",
+        "mae": 311.6670334610849,
+        "rmse": 417.33889845206573,
+        "mape": 4.354145835297783,
+        "r2": 0.9930340520432333
+      },
+      "train_metrics_segment": {
+        "note": "Metrici pe setul de antrenament la nivel de segment individual. MAE/RMSE in secunde, MAPE in procente, R2 intre 0 si 1.",
+        "mae": 28.978630408579004,
+        "rmse": 51.178614294201694,
+        "mape": 20.708377148781423,
+        "r2": 0.9546799574071516
+      },
+      "test_metrics_race": {
+        "note": "Metrici pe setul de test (race-level, activitati nevazute): predictiile per segment sunt sumate per activitate si comparate cu timpul real de cursa. Aceasta e metrica principala de evaluare.",
+        "mae": 596.5411631944445,
+        "rmse": 648.6633173967303,
+        "mape": 10.29490348120321,
+        "r2": 0.9249480178387687
+      },
+      "test_metrics_segment": {
+        "note": "Metrici pe setul de test la nivel de segment individual. MAPE poate fi mare (segmente scurte au timp mic => erori relative mari).",
+        "mae": 42.78664803076369,
+        "rmse": 69.53858428757196,
+        "mape": 22.089800967160386,
+        "r2": 0.9130144498433106
+      },
+      "shap_importance": {
+        "note": "Importanta fiecarui feature calculata cu SHAP (SHapley Additive exPlanations). Fiecare valoare reprezinta media valorilor absolute SHAP pe tot datasetul, exprimata in secunde. Interpretare: un feature cu valoarea 60 inseamna ca, in medie, prezenta acelui feature schimba predictia timpului de segment cu \u00b160 secunde. Featuri sortate descrescator dupa impact.",
+        "feature_descriptions": {
+          "segment_energy_cost": "Costul energetic Minetti (J/kg): 155.4*g^5 - 30.4*g^4 - 43.3*g^3 + 46.3*g^2 + 19.5*g + 3.6, inmultit cu distanta \u2014 formula biomecanica validata pentru alergare pe panta",
+          "segment_distance_m": "Lungimea segmentului (m)",
+          "elevation_gain_m": "Urcare bruta in segment (m)",
+          "intensity_level": "Intensitatea activitatii parinte (0=recuperare, 1=antrenament, 2=cursa) \u2014 captureaza diferentele de efort intentionat",
+          "uphill_cost": "Cost de urcare: distance * (1 + 6 * gradient) \u2014 0 pentru segmente fara urcare",
+          "avg_elevation": "Altitudinea medie a segmentului (m deasupra nivelului marii)",
+          "downhill_cost": "Cost de coborare: distance * (1 + 6 * |gradient|) \u2014 0 pentru segmente fara coborare",
+          "elevation_loss_m": "Coborare bruta in segment (m)",
+          "std_gradient": "Deviatia standard a pantei in segment \u2014 masoara neregularitatea terenului",
+          "avg_gradient": "Panta medie absoluta a segmentului (0.1 = 10%) \u2014 nu are semn",
+          "cumulative_elevation": "Urcare cumulativa de la startul activitatii pana la finalul acestui segment (m) \u2014 aproximeaza oboseala acumulata",
+          "max_downhill_gradient": "Panta maxima de coborare din segment (0 pentru segmente non-downhill)",
+          "max_uphill_gradient": "Panta maxima de urcare din segment (0 pentru segmente non-uphill)",
+          "is_steep_uphill": "1 daca segmentul urca abrupt (gradient >= 30%), altfel 0 \u2014 marcheaza sectiunile unde atletii merg pe jos",
+          "is_steep_downhill": "1 daca segmentul coboara abrupt (gradient >= 30%), altfel 0 \u2014 marcheaza coborarile tehnice"
+        },
+        "values": {
+          "segment_energy_cost": 68.74677276611328,
+          "segment_distance_m": 39.23894119262695,
+          "elevation_gain_m": 29.61235809326172,
+          "intensity_level": 23.10831642150879,
+          "uphill_cost": 17.848312377929688,
+          "avg_elevation": 13.958187103271484,
+          "downhill_cost": 13.909330368041992,
+          "elevation_loss_m": 8.917418479919434,
+          "std_gradient": 7.260874271392822,
+          "avg_gradient": 4.6660661697387695,
+          "cumulative_elevation": 4.5230183601379395,
+          "max_downhill_gradient": 4.459619998931885,
+          "max_uphill_gradient": 2.428882598876953,
+          "is_steep_uphill": 0.02548212744295597,
+          "is_steep_downhill": 0.0030742438975721598
+        }
+      }
+    }
+  },
+  "best_model": "ridge"
+}

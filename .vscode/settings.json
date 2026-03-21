@@ -1,0 +1,12 @@
+{
+    "claudeCodeChat.permissions.yoloMode": false,
+    "python.analysis.extraPaths": [
+        "./backend"
+    ],
+    "azureFunctions.deploySubpath": "azure_functions",
+    "azureFunctions.scmDoBuildDuringDeployment": true,
+    "azureFunctions.pythonVenv": ".venv",
+    "azureFunctions.projectLanguage": "Python",
+    "azureFunctions.projectRuntime": "~4",
+    "debug.internalConsoleOptions": "neverOpen"
+}

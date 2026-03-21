@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+scikit-learn
+pandas
+numpy
+joblib
+xgboost
+shap
+gpxpy
+scipy
+python-multipart
+requests
+pyarrow
+azure-storage-blob
+aiohttp==3.9.1

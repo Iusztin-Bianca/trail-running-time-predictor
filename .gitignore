@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+*.pyc
+
+# IDEs
+.claude/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project data
+backend/data/raw_gpx/*.gpx
+backend/data/*.parquet
+
+# Environment & Secrets
+.env
+.env.local
+local.settings.json
+**/local.settings.json
+
+# Logs
+*.log
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Node
+node_modules/
+
+# Windows artifacts
+nul
+AzureCLI.msi
+*.msi
+
+*.md
