@@ -163,6 +163,11 @@ class BlobStorageManager:
                 self.upload_parquet(new_df, overwrite=True)
                 return
 
+            # Normalize start_date to datetime in both DataFrames before concat
+            existing_df["start_date"] = pd.to_datetime(existing_df["start_date"], utc=True)
+            new_df = new_df.copy()
+            new_df["start_date"] = pd.to_datetime(new_df["start_date"], utc=True)
+
             # Append new data
             combined_df = pd.concat([existing_df, new_df], ignore_index=True)
 
