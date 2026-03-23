@@ -3,7 +3,6 @@
 import json
 import logging
 from datetime import datetime
-from pathlib import Path
 
 import pandas as pd
 
@@ -11,8 +10,6 @@ from app.constants import DEFAULT_EXCLUDE_COLUMNS
 from app.ml.evaluation.shap_analyzer import SHAPAnalyzer
 
 logger = logging.getLogger(__name__)
-
-RESULTS_DIR = Path(__file__).resolve().parent / "results"
 
 # Descriptions for each feature used in training.
 _SHAP_FEATURE_DESCRIPTIONS = {
@@ -42,12 +39,18 @@ class ModelComparisonService:
     This service receives the training data and model results, then:
       - Computes SHAP feature importance for each model
       - Builds a structured comparison dict (metrics + best model selection)
-      - Saves results to results/model_draft_comparison.json
-      - Appends a new entry to results/models_compare_history.json
+      - Saves results to results/model_draft_comparison.json (local) or Blob Storage
+      - Appends a new entry to results/models_compare_history.json (local) or Blob Storage
+
+    Args:
+        shap_analyzer: Optional SHAPAnalyzer instance.
+        blob_manager: Optional BlobStorageManager. When provided, results are saved
+                      to Azure Blob Storage instead of the local filesystem.
     """
 
-    def __init__(self, shap_analyzer: SHAPAnalyzer | None = None):
+    def __init__(self, shap_analyzer: SHAPAnalyzer | None = None, blob_manager=None):
         self.shap_analyzer = shap_analyzer or SHAPAnalyzer()
+        self.blob_manager = blob_manager
 
     def run(self, df: pd.DataFrame, model_results: dict) -> dict:
         """
@@ -70,9 +73,9 @@ class ModelComparisonService:
         # 2. Build comparison dict and pick the best model
         comparison = self._build_comparison(df, model_results)
 
-        # 3. Save results to disk
-        self._save_results(comparison)
-        self._append_to_history(comparison)
+        # 3. Save results to Blob Storage
+        self._save_results_to_blob(comparison)
+        self._append_to_history_blob(comparison)
 
         return comparison
 
@@ -172,67 +175,60 @@ class ModelComparisonService:
 
         return comparison
 
-    def _save_results(self, comparison: dict) -> None:
-        """Save comparison results to a JSON file."""
-        RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-        filepath = RESULTS_DIR / "model_draft_comparison.json"
+    def _save_results_to_blob(self, comparison: dict) -> None:
+        """Upload latest comparison results to Blob Storage."""
+        blob_client = self.blob_manager.blob_service_client.get_blob_client(
+            container=self.blob_manager.container_name,
+            blob="results/model_draft_comparison.json",
+        )
+        blob_client.upload_blob(
+            json.dumps(comparison, indent=2, default=str).encode("utf-8"),
+            overwrite=True,
+        )
+        logger.info("Uploaded results/model_draft_comparison.json to Blob Storage")
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(comparison, f, indent=2, default=str)
+    def _append_to_history_blob(self, comparison: dict) -> None:
+        """Append a training run summary to models_compare_history.json in Blob Storage."""
+        history_client = self.blob_manager.blob_service_client.get_blob_client(
+            container=self.blob_manager.container_name,
+            blob="results/models_compare_history.json",
+        )
 
-        logger.info("Results saved to %s", filepath)
-
-    def _append_to_history(self, comparison: dict) -> None:
-        """Append a training run summary to models_compare_history.json.
-
-        The file has two sections:
-        - shap_feature_description
-        - training_runs: list that grows with each retraining call
-
-        Each entry records: training date, dataset size, best model,
-        and per-model test/train metrics plus SHAP values.
-        """
-        RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-        history_path = RESULTS_DIR / "models_compare_history.json"
-
-        # Load existing history or create a first template with shap descriptions
-        if history_path.exists():
-            with open(history_path, "r", encoding="utf-8") as f:
-                history = json.load(f)
+        if history_client.exists():
+            history = json.loads(history_client.download_blob().readall().decode("utf-8"))
         else:
             history = {
                 "shap_feature_descriptions": _SHAP_FEATURE_DESCRIPTIONS,
                 "training_runs": [],
             }
 
-        # Build the compact entry for this run
         entry = {
             "trained_at": comparison["timestamp"],
             "dataset": comparison["dataset"],
             "best_model": comparison["best_model"],
-            "models": {},
+            "models": {
+                model_name: {
+                    "best_params": model_data["best_params"],
+                    "test_metrics_race": {
+                        k: v for k, v in model_data["test_metrics_race"].items()
+                        if k != "note"
+                    },
+                    "train_metrics_race": {
+                        k: v for k, v in model_data["train_metrics_race"].items()
+                        if k != "note"
+                    },
+                    "shap_values": model_data["shap_importance"]["values"],
+                }
+                for model_name, model_data in comparison["models"].items()
+            },
         }
-
-        for model_name, model_data in comparison["models"].items():
-            entry["models"][model_name] = {
-                "best_params": model_data["best_params"],
-                "test_metrics_race": {
-                    k: v for k, v in model_data["test_metrics_race"].items()
-                    if k != "note"
-                },
-                "train_metrics_race": {
-                    k: v for k, v in model_data["train_metrics_race"].items()
-                    if k != "note"
-                },
-                "shap_values": model_data["shap_importance"]["values"],
-            }
-
         history["training_runs"].append(entry)
 
-        with open(history_path, "w", encoding="utf-8") as f:
-            json.dump(history, f, indent=2, default=str)
-
+        history_client.upload_blob(
+            json.dumps(history, indent=2, default=str).encode("utf-8"),
+            overwrite=True,
+        )
         logger.info(
-            "History updated: %d total runs — %s",
-            len(history["training_runs"]), history_path,
+            "History updated: %d total runs — results/models_compare_history.json",
+            len(history["training_runs"]),
         )

@@ -7,6 +7,7 @@ retrains models, and saves the new model version.
 
 This script mirrors the logic in azure_functions/strava_monthly_update/__init__.py.
 """
+import json
 import logging
 import sys
 from datetime import datetime, timezone
@@ -14,7 +15,7 @@ from pathlib import Path
 
 from app.data_ingestion.strava_client import StravaClient
 from app.data_ingestion.data_ingestion_pipeline import DataIngestionPipeline
-from app.feature_engineering.features import FeatureExtractor
+from app.feature_engineering.segment_features import SegmentFeatureExtractor
 from app.ml.data.blob_storage import BlobStorageManager
 from app.ml.data.data_splitter import TemporalSplitter
 from app.ml.evaluation.metrics import MetricsCalculator
@@ -45,7 +46,7 @@ def _retrain_and_save(blob_manager: BlobStorageManager) -> None:
     model_results = ModelTrainer.train_all(df, splitter, metrics)
 
     try:
-        ModelComparisonService().run(df, model_results)
+        ModelComparisonService(blob_manager=blob_manager).run(df, model_results)
     except Exception as e:
         logger.warning("Model comparison/SHAP skipped (non-critical): %s", e)
 
@@ -76,7 +77,7 @@ def main() -> None:
 
         # Initialize feature extractor
         logger.info("Initializing feature extractor...")
-        feature_extractor = FeatureExtractor()
+        feature_extractor = SegmentFeatureExtractor()
 
         # Initialize pipeline
         logger.info("Initializing Strava training pipeline...")
