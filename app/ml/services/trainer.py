@@ -62,9 +62,10 @@ class ModelTrainer:
         return X, y
 
     @staticmethod
-    def _compute_sample_weights(df: pd.DataFrame, race_weight: float = 3.0) -> np.ndarray:
+    def _compute_sample_weights(df: pd.DataFrame, race_weight: float = 2.0) -> np.ndarray:
         """Return per-sample weights: race_weight for race segments (intensity_level==2), 1 otherwise."""
         return np.where(df["intensity_level"].values == 2, race_weight, 1.0)
+
 
 
     def _race_level_metrics(self, df: pd.DataFrame, y_pred_segments: np.ndarray) -> dict:
