@@ -19,7 +19,7 @@ from app.feature_engineering.segment_features import SegmentFeatureExtractor
 from app.ml.data.blob_storage import BlobStorageManager
 from app.ml.data.data_splitter import TemporalSplitter
 from app.ml.evaluation.metrics import MetricsCalculator
-from app.ml.services.model_comparisor import ModelComparisonService
+from app.ml.services.model_comparison import ModelComparisonService
 from app.ml.services.model_persistence import ModelPersistenceService
 from app.ml.services.trainer import ModelTrainer
 from app.config.settings import settings

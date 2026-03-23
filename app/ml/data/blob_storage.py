@@ -168,11 +168,12 @@ class BlobStorageManager:
             new_df = new_df.copy()
             new_df["start_date"] = pd.to_datetime(new_df["start_date"], utc=True)
 
+            # Remove existing segments for activities that are in new_df (handles re-runs)
+            new_activity_ids = set(new_df["activity_id"].unique())
+            existing_df = existing_df[~existing_df["activity_id"].isin(new_activity_ids)]
+
             # Append new data
             combined_df = pd.concat([existing_df, new_df], ignore_index=True)
-
-            # Remove duplicates based on activity_id (keep latest)
-            combined_df = combined_df.drop_duplicates(subset=['activity_id'], keep='last')
 
             # Sort by start_date
             combined_df['start_date_parsed'] = pd.to_datetime(combined_df['start_date'])

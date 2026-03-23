@@ -84,7 +84,7 @@ class ModelComparisonService:
         total_activities = df["activity_id"].nunique()
         avg_segment_duration = round(df["segment_time_sec"].mean(), 1) if "segment_time_sec" in df.columns else None
         avg_race_duration = round(
-            df.groupby("activity_id")["segment_time_sec"].mean(), 1
+            df.groupby("activity_id")["segment_time_sec"].sum().mean(), 1
         ) if "segment_time_sec" in df.columns else None
 
         comparison = {
