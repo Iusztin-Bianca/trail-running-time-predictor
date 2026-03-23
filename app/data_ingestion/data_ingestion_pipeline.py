@@ -4,7 +4,7 @@ Pipeline for fetching Strava running activities and extracting features for trai
 This pipeline:
 1. Fetches all "Run" and "TrailRun" activities from Strava with elevation gain >= 100m
 2. Extracts features from each activity using FeatureExtractor
-3. Stores intensity_level feature (0 = recovery, 1 = training, 2 = race)
+3. Stores intensity_level feature (0 = non-race, 1 = race)
 4. Computes historical features (e.g., elevation_gain_last_30d for training load)
 5. Saves all features to a parquet file for ML training
 """
@@ -30,7 +30,7 @@ class DataIngestionPipeline:
     This pipeline handles the complete flow from Strava API to parquet dataset:
     - Fetch all Run and TrailRun activities with elevation_gain >= 150m and distance >= 5km
     - Extract segment features using SegmentFeatureExtractor (one row per segment per activity)
-    - Track intensity_level feature (0 = recovery, 1 = training, 2 = race)
+    - Track intensity_level feature (0 = non-race, 1 = race)
     - Save to parquet file for model training
     """
 
@@ -192,7 +192,7 @@ class DataIngestionPipeline:
         Each row contains:
         - activity_id: Strava activity ID
         - activity_name: Activity name
-        - intensity_level: 0 = recovery, 1 = training, 2 = race
+        - intensity_level: 0 = non-race, 1 = race
         - start_date: Activity start datetime
         - All extracted features (distance, elevation, slopes, etc.)
         """
@@ -216,14 +216,9 @@ class DataIngestionPipeline:
                     activity["start_date"].replace("Z", "+00:00")
                 )
 
-                # Determine intensity level from workout_type
+                # Determine intensity level from workout_type (binary: 1=race, 0=non-race)
                 workout_type = activity.get("workout_type")
-                if workout_type == STRAVA_WORKOUT_TYPE_RECOVERY:
-                    intensity_level = INTENSITY_RECOVERY
-                elif workout_type == STRAVA_WORKOUT_TYPE_RACE:
-                    intensity_level = INTENSITY_RACE
-                else:
-                    intensity_level = INTENSITY_TRAINING
+                intensity_level = INTENSITY_RACE if workout_type == STRAVA_WORKOUT_TYPE_RACE else INTENSITY_TRAINING
 
                 # Extract features from streams (also saves raw data if configured)
                 segment_features = self.extract_features_from_activity(
@@ -395,9 +390,8 @@ class DataIngestionPipeline:
             logger.info("SUMMARY STATISTICS")
             logger.info("=" * 80)
             logger.info(f"Total segment activities: {len(df)}")
-            logger.info(f"  - Recovery runs (intensity_level=0): {(df['intensity_level'] == 0).sum()}")
-            logger.info(f"  - Training runs (intensity_level=1): {(df['intensity_level'] == 1).sum()}")
-            logger.info(f"  - Race runs (intensity_level=2): {(df['intensity_level'] == 2).sum()}")
+            logger.info(f"  - Non-race runs (intensity_level=0): {(df['intensity_level'] == 0).sum()}")
+            logger.info(f"  - Race runs (intensity_level=1): {(df['intensity_level'] == 1).sum()}")
             logger.info(f"\nElevation gain statistics:")
             logger.info(f"  - Mean: {df['elevation_gain_m'].mean():.1f} m")
             logger.info(f"  - Median: {df['elevation_gain_m'].median():.1f} m")

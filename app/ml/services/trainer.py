@@ -61,11 +61,6 @@ class ModelTrainer:
         y = df[self.target_column].values
         return X, y
 
-    @staticmethod
-    def _compute_sample_weights(df: pd.DataFrame, race_weight: float = 2.0) -> np.ndarray:
-        """Return per-sample weights: race_weight for race segments (intensity_level==2), 1 otherwise."""
-        return np.where(df["intensity_level"].values == 2, race_weight, 1.0)
-
 
 
     def _race_level_metrics(self, df: pd.DataFrame, y_pred_segments: np.ndarray) -> dict:
@@ -113,9 +108,8 @@ class ModelTrainer:
 
             X_train, y_train = self._prepare_xy(train_df, feature_cols)
             X_val, _ = self._prepare_xy(val_df, feature_cols)
-            weights = self._compute_sample_weights(train_df)
 
-            model.fit(X_train, self._transform_y(y_train), sample_weight=weights)
+            model.fit(X_train, self._transform_y(y_train))
             y_pred_seg = self._inverse_transform_y(model.predict(X_val))
 
             metrics = self._race_level_metrics(val_df, y_pred_seg)
@@ -159,8 +153,7 @@ class ModelTrainer:
             param_grid=param_grid,
             splitter=self.splitter,
         )
-        tune_weights = self._compute_sample_weights(train_df)
-        tune_result = tuner.tune(X_train, y_train_t, train_df, sample_weight=tune_weights)
+        tune_result = tuner.tune(X_train, y_train_t, train_df)
 
         # 3. Build best model with tuned hyperparameters
         best_hyperparams = tuner.update_hyperparams(tune_result["best_params"])
@@ -169,8 +162,7 @@ class ModelTrainer:
         # 4. Race-level CV with best model on train set
         # cross_validate() refits the model on each fold, so refit on full train after
         cv_metrics = self.cross_validate(train_df, model=best_model)
-        train_weights = self._compute_sample_weights(train_df)
-        best_model.fit(X_train, y_train_t, sample_weight=train_weights)
+        best_model.fit(X_train, y_train_t)
         logger.info("Best model fitted on full train set (%d segments) after CV.", len(X_train))
 
         # 5. Train set metrics (overfitting check: compare with test metrics)

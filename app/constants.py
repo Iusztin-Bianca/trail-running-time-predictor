@@ -32,8 +32,7 @@ MIN_TRAIN_RATIO = 0.2           # Minimum ratio of data for initial training
 STRAVA_WORKOUT_TYPE_RECOVERY = 2
 STRAVA_WORKOUT_TYPE_RACE = 1
 
-# Our intensity_level mapping for each running activity
-INTENSITY_RECOVERY = 0
-INTENSITY_TRAINING = 1
-INTENSITY_RACE = 2
+# Our intensity_level mapping for each running activity (binary: 1 = race, 0 = everything else)
+INTENSITY_TRAINING = 0
+INTENSITY_RACE = 1
 

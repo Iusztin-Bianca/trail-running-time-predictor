@@ -32,7 +32,7 @@ class XGBoostModel(BaseModel):
             **params,
         )
 
-    def fit(self, X: np.ndarray, y: np.ndarray, sample_weight: np.ndarray | None = None) -> XGBoostModel:
+    def fit(self, X: np.ndarray, y: np.ndarray) -> XGBoostModel:
         """
         Train the XGBoost model.
 
@@ -42,34 +42,26 @@ class XGBoostModel(BaseModel):
         Args:
             X: Feature matrix (n_samples, n_features)
             y: Target values (n_samples,)
-            sample_weight: Per-sample weights (n_samples,). Race segments get higher weight.
         """
         logger.info(f"Training XGBoost model with {X.shape[0]} samples, {X.shape[1]} features")
         logger.info(f"Key hyperparameters: max_depth={self.hyperparameters.max_depth}, "
                    f"n_estimators={self.hyperparameters.n_estimators}, "
                    f"learning_rate={self.hyperparameters.learning_rate}")
 
-        if sample_weight is not None:
-            race_count = int((sample_weight > 1).sum())
-            logger.info(f"Using sample weights: {race_count} race segments (weight=3), "
-                       f"{len(sample_weight) - race_count} other segments (weight=1)")
-
         if self.early_stopping_rounds > 0 and X.shape[0] >= 10:
             split = int(len(X) * 0.8)
             X_train, X_val = X[:split], X[split:]
             y_train, y_val = y[:split], y[split:]
-            w_train = sample_weight[:split] if sample_weight is not None else None
 
             self.model.fit(
                 X_train, y_train,
-                sample_weight=w_train,
                 eval_set=[(X_val, y_val)],
                 verbose=False,
             )
             best_iter = getattr(self.model, "best_iteration", self.hyperparameters.n_estimators)
             logger.info(f"Early stopping: used {best_iter} / {self.hyperparameters.n_estimators} trees")
         else:
-            self.model.fit(X, y, sample_weight=sample_weight)
+            self.model.fit(X, y)
 
         self.is_fitted = True
         logger.info("XGBoost model trained successfully")

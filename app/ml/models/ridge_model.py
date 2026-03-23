@@ -30,7 +30,7 @@ class RidgeModel(BaseModel):
         self.scaler = StandardScaler()
         self.model = Ridge(**vars(hyperparameters))
 
-    def fit(self, X: np.ndarray, y: np.ndarray, sample_weight: np.ndarray | None = None) -> RidgeModel:
+    def fit(self, X: np.ndarray, y: np.ndarray) -> RidgeModel:
         """
         Train the Ridge model.
         Args:
@@ -44,7 +44,7 @@ class RidgeModel(BaseModel):
         X_scaled = self.scaler.fit_transform(X)
 
         # Fit model
-        self.model.fit(X_scaled, y, sample_weight=sample_weight)
+        self.model.fit(X_scaled, y)
         self.is_fitted = True
 
         logger.info(f"Ridge model trained. Intercept: {self.model.intercept_:.4f}")
