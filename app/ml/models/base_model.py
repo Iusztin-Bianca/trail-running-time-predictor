@@ -24,7 +24,7 @@ class BaseModel(ABC):
         self.is_fitted = False
 
     @abstractmethod
-    def fit(self, X: np.ndarray, y: np.ndarray):
+    def fit(self, X: np.ndarray, y: np.ndarray, sample_weight: np.ndarray | None = None):
         """Train the model on the given data."""
         pass
 

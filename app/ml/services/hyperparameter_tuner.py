@@ -88,6 +88,7 @@ class HyperparameterTuner:
         y: np.ndarray,
         train_df: pd.DataFrame,
         n_splits: int = DEFAULT_CV_SPLITS,
+        sample_weight: np.ndarray | None = None,
     ) -> dict:
         """Run GridSearchCV with activity-level CV folds and return the best params and score.
 
@@ -95,6 +96,7 @@ class HyperparameterTuner:
             X: Feature matrix aligned with train_df rows.
             y: Target array aligned with train_df rows.
             train_df: DataFrame used to determine activity-level folds
+            sample_weight: Optional per-sample weights passed through to fit().
 
         Returns dict with:
             best_params — the winning hyperparameter combination for model
@@ -112,7 +114,13 @@ class HyperparameterTuner:
             refit=False,
             n_jobs=1,
         )
-        search.fit(X, y)
+
+        if sample_weight is not None:
+            # Ridge uses a Pipeline, so the fit param needs the step prefix
+            fit_param_key = "model__sample_weight" if self.model_name == "ridge" else "sample_weight"
+            search.fit(X, y, **{fit_param_key: sample_weight})
+        else:
+            search.fit(X, y)
 
         # Clean param names (remove pipeline prefix)
         best_params = {
