@@ -18,7 +18,7 @@ from app.data_ingestion.strava_client import StravaClient
 from app.feature_engineering.point_extractor import PointExtractor
 from app.feature_engineering.segment_features import SegmentFeatureExtractor
 from app.config.settings import settings
-from app.constants import INTENSITY_RACE, INTENSITY_TRAINING, STRAVA_WORKOUT_TYPE_RACE, STRAVA_WORKOUT_TYPE_RECOVERY
+from app.constants import STRAVA_WORKOUT_TYPE_RACE, STRAVA_WORKOUT_TYPE_RECOVERY
 from app.ml.data.blob_storage import BlobStorageManager
 
 logger = logging.getLogger(__name__)
