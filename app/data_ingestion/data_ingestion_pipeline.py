@@ -4,7 +4,7 @@ Pipeline for fetching Strava running activities and extracting features for trai
 This pipeline:
 1. Fetches all "Run" and "TrailRun" activities from Strava with elevation gain >= 100m
 2. Extracts features from each activity using FeatureExtractor
-3. Stores intensity_level feature (0 = non-race, 1 = race)
+3. Stores is_race / is_easy binary features
 4. Computes historical features (e.g., elevation_gain_last_30d for training load)
 5. Saves all features to a parquet file for ML training
 """
@@ -30,7 +30,7 @@ class DataIngestionPipeline:
     This pipeline handles the complete flow from Strava API to parquet dataset:
     - Fetch all Run and TrailRun activities with elevation_gain >= 150m and distance >= 5km
     - Extract segment features using SegmentFeatureExtractor (one row per segment per activity)
-    - Track intensity_level feature (0 = non-race, 1 = race)
+    - Track is_race / is_easy binary features
     - Save to parquet file for model training
     """
 
@@ -124,7 +124,8 @@ class DataIngestionPipeline:
         self,
         activity_id: int,
         start_time: datetime,
-        intensity_level: int,
+        is_race: int,
+        is_easy: int,
         activity_metadata: Optional[Dict] = None
     ) -> Optional[List[Dict[str, float]]]:
         """
@@ -171,7 +172,7 @@ class DataIngestionPipeline:
             distance_stream = None
             if streams.get('distance'):
                 distance_stream = streams['distance']['data'] if isinstance(streams['distance'], dict) else streams['distance']
-            segment_features = self.feature_extractor.extract_features(points, intensity_level, distance_stream)
+            segment_features = self.feature_extractor.extract_features(points, is_race, is_easy, distance_stream)
 
             return segment_features
 
@@ -192,7 +193,8 @@ class DataIngestionPipeline:
         Each row contains:
         - activity_id: Strava activity ID
         - activity_name: Activity name
-        - intensity_level: 0 = non-race, 1 = race
+        - is_race: 1 if activity is a race, 0 otherwise
+        - is_easy: 1 if activity is a recovery run, 0 otherwise
         - start_date: Activity start datetime
         - All extracted features (distance, elevation, slopes, etc.)
         """
@@ -216,15 +218,17 @@ class DataIngestionPipeline:
                     activity["start_date"].replace("Z", "+00:00")
                 )
 
-                # Determine intensity level from workout_type (binary: 1=race, 0=non-race)
+                # Determine binary activity type flags from Strava workout_type
                 workout_type = activity.get("workout_type")
-                intensity_level = INTENSITY_RACE if workout_type == STRAVA_WORKOUT_TYPE_RACE else INTENSITY_TRAINING
+                is_race = 1 if workout_type == STRAVA_WORKOUT_TYPE_RACE else 0
+                is_easy = 1 if workout_type == STRAVA_WORKOUT_TYPE_RECOVERY else 0
 
                 # Extract features from streams (also saves raw data if configured)
                 segment_features = self.extract_features_from_activity(
                     activity_id=activity_id,
                     start_time=start_time,
-                    intensity_level = intensity_level,
+                    is_race=is_race,
+                    is_easy=is_easy,
                     activity_metadata=activity  # Pass full activity for raw data storage
                 )
 
@@ -390,8 +394,8 @@ class DataIngestionPipeline:
             logger.info("SUMMARY STATISTICS")
             logger.info("=" * 80)
             logger.info(f"Total segment activities: {len(df)}")
-            logger.info(f"  - Non-race runs (intensity_level=0): {(df['intensity_level'] == 0).sum()}")
-            logger.info(f"  - Race runs (intensity_level=1): {(df['intensity_level'] == 1).sum()}")
+            logger.info(f"  - Race segments (is_race=1): {(df['is_race'] == 1).sum()}")
+            logger.info(f"  - Easy/recovery segments (is_easy=1): {(df['is_easy'] == 1).sum()}")
             logger.info(f"\nElevation gain statistics:")
             logger.info(f"  - Mean: {df['elevation_gain_m'].mean():.1f} m")
             logger.info(f"  - Median: {df['elevation_gain_m'].median():.1f} m")

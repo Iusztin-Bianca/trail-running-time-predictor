@@ -299,7 +299,8 @@ class SegmentFeatureExtractor:
         start_idx: int,
         end_idx: int,
         terrain_type: str,
-        intensity_level: int,
+        is_race: int,
+        is_easy: int,
         gradients: np.ndarray = None,
     ) -> Dict[str, float]:
         """Extract features for a single segment.
@@ -309,8 +310,8 @@ class SegmentFeatureExtractor:
             start_idx: Start index of segment
             end_idx: End index of segment
             terrain_type: 'uphill', 'downhill', or 'flat'
-            intensity_level: Intensity level of parent activity
-            total_distance_m: Total distance of the activity (for progress calculation)
+            is_race: 1 if parent activity is a race, 0 otherwise
+            is_easy: 1 if parent activity is a recovery run, 0 otherwise
 
         Returns:
             Dictionary of features
@@ -394,7 +395,8 @@ class SegmentFeatureExtractor:
             'max_uphill_gradient': round(max_uphill_gradient, 3),
             'max_downhill_gradient': round(max_downhill_gradient, 3),
             'avg_elevation': round(avg_elevation, 1),
-            'intensity_level': intensity_level,
+            'is_race': is_race,
+            'is_easy': is_easy,
             'uphill_cost': round(uphill_cost, 3),
             'downhill_cost': round(downhill_cost, 3),
             'cumulative_elevation': round(cumulative_elevation, 3),
@@ -407,7 +409,8 @@ class SegmentFeatureExtractor:
     def extract_features(
         self,
         points: List[Point],
-        intensity_level: int,
+        is_race: int,
+        is_easy: int,
         distance_stream: List[float] = None,
     ) -> List[Dict[str, float]]:
         """Build segment features from a list of GPS points(comming from strava streams/ gpx file)
@@ -436,7 +439,7 @@ class SegmentFeatureExtractor:
         segment_features = []
         for start_idx, end_idx, terrain_type in segments:
             features = self._extract_segment_features(
-                df, start_idx, end_idx, terrain_type, intensity_level,
+                df, start_idx, end_idx, terrain_type, is_race, is_easy,
                 gradients=gradients,
             )
 
