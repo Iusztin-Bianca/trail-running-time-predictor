@@ -7,7 +7,7 @@ This module provides a unified interface for extracting GPS points from differen
 """
 import gpxpy
 from io import BytesIO
-from typing import Dict, List
+from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 
@@ -18,7 +18,7 @@ class Point:
     latitude: float
     longitude: float
     elevation: float
-    time: datetime
+    time: Optional[datetime]
 
 
 class PointExtractor:
@@ -118,17 +118,16 @@ class PointExtractor:
         def collect_points_from_segment(segment_points):
             """Helper to collect points from track segments or routes."""
             for p in segment_points:
-                # Only include points with complete data
+                # Require position and elevation; time is optional (route GPX files have no timestamps)
                 if (p.latitude is not None and
                     p.longitude is not None and
-                    p.elevation is not None and
-                    p.time is not None):
+                    p.elevation is not None):
 
                     points.append(Point(
                         latitude=p.latitude,
                         longitude=p.longitude,
                         elevation=p.elevation,
-                        time=p.time
+                        time=p.time  # may be None for planned routes
                     ))
 
         # Extract from tracks

@@ -1,28 +1,22 @@
-from contextlib import asynccontextmanager
-from fastapi import FastAPI, UploadFile, File, HTTPException
 import logging
+from contextlib import asynccontextmanager
 
-from app.feature_engineering import FeatureExtractor
-from app.ml.data import BlobStorageManager
-from app.config.settings import settings
-from .schemas import PredictionResponse
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Configure logging
+from app.config.settings import settings
+from app.ml.data import BlobStorageManager
+from .routes import health, predict
+
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
-
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Application startup logic.
-    Loads the latest model from Blob Storage.
-    """
     app.state.model = None
     app.state.model_name = None
     app.state.model_version = None
@@ -43,7 +37,6 @@ async def lifespan(app: FastAPI):
     else:
         logger.warning(
             "No trained model found in Blob Storage. "
-            "Trigger the Azure Function 'strava_monthly_update' to fetch data and train the first model."
         )
 
     yield
@@ -57,32 +50,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
-
-@app.post("/predict", response_model=PredictionResponse)
-def predict():
-    predicted_time = 360  # placeholder
-    return PredictionResponse(predicted_time_minutes=predicted_time)
-
-@app.post("/predict-from-gpx")
-def predict_from_gpx(file: UploadFile = File(...)):
-    print("File: ", file);
-    if not file.filename.endswith(".gpx"):
-        raise HTTPException(status_code=400, detail="Invalid file type. GPX required.")
-
-    file_bytes = file.read()
-
-    try:
-        extractor = FeatureExtractor()
-        features = extractor.extract_from_gpx(file_bytes)
-    except Exception:
-        raise HTTPException(status_code=400, detail="Failed to parse GPX file.")
-
-    # Temporary placeholder prediction logic
-    predicted_time_minutes = 1500
-
-    return {
-        "predicted_time_minutes": round(predicted_time_minutes, 1)
-    }
+app.include_router(health.router)
+app.include_router(predict.router)

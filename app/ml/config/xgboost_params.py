@@ -12,9 +12,9 @@ class XGBoostParams:
     subsample: float = 0.8           # Observation percentage used for each tree
     colsample_bytree: float = 0.8    # Feature percentage used for each tree
     reg_alpha : float = 1            # L1 regularization
-    reg_lambda: float = 8            # L2 regularization
+    reg_lambda: float = 10           # L2 regularization
     random_state: int = 42
-    gamma: float = 2
+    gamma: float = 5
     early_stopping_rounds: int = 0  # Stop if no improvement for 20 rounds
 
 

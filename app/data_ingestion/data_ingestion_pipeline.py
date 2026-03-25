@@ -3,16 +3,15 @@ Pipeline for fetching Strava running activities and extracting features for trai
 
 This pipeline:
 1. Fetches all "Run" and "TrailRun" activities from Strava with elevation gain >= 100m
-2. Extracts features from each activity using FeatureExtractor
+2. Extracts features from each activity using SegmentFeatureExtractor
 3. Stores is_race / is_easy binary features
-4. Computes historical features (e.g., elevation_gain_last_30d for training load)
-5. Saves all features to a parquet file for ML training
+4. Saves all features to a parquet file for ML training
 """
 import logging
 import pandas as pd
 from pathlib import Path
 from typing import Dict, List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from app.data_ingestion.strava_client import StravaClient
 from app.feature_engineering.point_extractor import PointExtractor
@@ -273,55 +272,6 @@ class DataIngestionPipeline:
 
         return pd.DataFrame(rows)
 
-    def compute_historical_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Compute historical/temporal features that depend on past activities.
-
-        Args:
-            df: DataFrame with activities and their features
-
-        Returns:
-            DataFrame with additional historical features:
-            - elevation_gain_last_30d: Total elevation gained in 30 days before each activity
-              (reflects training load / how trained the athlete was)
-
-        Activities are sorted by date, and for each activity we look at
-        all prior activities within the 30-day window (excluding current activity).
-        """
-        if df.empty:
-            return df
-
-        logger.info("Computing historical features...")
-
-        # Ensure start_date is datetime
-        df = df.copy()
-        df["start_date_dt"] = pd.to_datetime(df["start_date"])
-
-        # Sort by date (oldest first)
-        df = df.sort_values("start_date_dt").reset_index(drop=True)
-
-        # Compute elevation gained in last 30 days for each activity
-        elevation_last_30d = []
-
-        for i, row in df.iterrows():
-            current_date = row["start_date_dt"]
-            window_start = current_date - timedelta(days=30)
-
-            # Get all activities in the 30-day window BEFORE current activity
-            mask = (df["start_date_dt"] >= window_start) & (df["start_date_dt"] < current_date)
-            prior_activities = df.loc[mask]
-
-            # Sum elevation gain from prior activities
-            total_elevation = prior_activities["elevation_gain_m"].sum()
-            elevation_last_30d.append(round(total_elevation, 1))
-
-        df["elevation_gain_last_30d"] = elevation_last_30d
-
-        # Remove temporary column
-        df = df.drop(columns=["start_date_dt"])
-
-        return df
-
     def save_to_parquet(self, df: pd.DataFrame) -> None:
         """
         Save DataFrame to parquet file.
@@ -381,11 +331,7 @@ class DataIngestionPipeline:
         # Step 2: Extract features
         df = self.process_activities(activities)
 
-        # Step 3: Compute historical features (training load indicators)
-        if not df.empty:
-            df = self.compute_historical_features(df)
-
-        # Step 4: Save to parquet
+        # Step 3: Save to parquet
         if not df.empty:
             self.save_to_parquet(df)
 

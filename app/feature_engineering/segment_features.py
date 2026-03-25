@@ -88,13 +88,15 @@ class SegmentFeatureExtractor:
         """
         data = []
 
+        has_time = start_time is not None
+
         # Use Strava's pre-calculated distance if available (MUCH more accurate!)
         if distance_stream is not None and len(distance_stream) == len(points):
             for i, point in enumerate(points):
                 data.append({
                     'distance_m': distance_stream[i],
                     'altitude_m': point.elevation,
-                    'time_sec': (point.time - start_time).total_seconds()
+                    'time_sec': (point.time - start_time).total_seconds() if has_time else 0.0,
                 })
         else:
             # Calculate distance with Haversine
@@ -108,7 +110,7 @@ class SegmentFeatureExtractor:
                 data.append({
                     'distance_m': cumulative_distance,
                     'altitude_m': point.elevation,
-                    'time_sec': (point.time - start_time).total_seconds()
+                    'time_sec': (point.time - start_time).total_seconds() if has_time else 0.0,
                 })
 
         return pd.DataFrame(data)
@@ -230,13 +232,16 @@ class SegmentFeatureExtractor:
 
         filtered = []
         i = 0
+        has_time_data = df['time_sec'].max() > 0
 
         while i < len(segments):
             start_idx, end_idx, terrain_type = segments[i]
             segment_dist = df.iloc[end_idx]['distance_m'] - df.iloc[start_idx]['distance_m']
             segment_time = df.iloc[end_idx]['time_sec'] - df.iloc[start_idx]['time_sec']
 
-            if segment_dist < self.MIN_SEGMENT_DISTANCE_M or segment_time < self.MIN_SEGMENT_TIME_SEC:
+            too_short = segment_dist < self.MIN_SEGMENT_DISTANCE_M
+            too_fast = has_time_data and segment_time < self.MIN_SEGMENT_TIME_SEC
+            if too_short or too_fast:
                 if i < len(segments) - 1:
                     # Merge forward into next segment
                     next_start, next_end, next_type = segments[i + 1]
@@ -421,7 +426,7 @@ class SegmentFeatureExtractor:
             logger.warning("Not enough points for segmentation (need at least 2).")
             return []
 
-        start_time = points[0].time
+        start_time = points[0].time  # may be None for route GPX files without timestamps
 
         df = self._build_dataframe_from_points(points, start_time, distance_stream)
 

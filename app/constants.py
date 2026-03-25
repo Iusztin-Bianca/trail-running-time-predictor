@@ -16,7 +16,8 @@ DEFAULT_EXCLUDE_COLUMNS = {
     "total_time_sec",       # Legacy activity-level target (kept for safety)
     "activity_id",          # Identifier, not a feature
     "activity_name",        # Identifier, not a feature
-    "start_date_dt",        # Datetime version of start_date
+    "start_date_dt",            # Datetime version of start_date
+    "elevation_gain_last_30d",  # Historical training load — cannot be computed at inference time
 }
 
 # Default training configuration values
