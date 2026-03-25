@@ -15,7 +15,7 @@ class ModelPersistenceService:
     def __init__(
         self,
         blob_manager: BlobStorageManager,
-        production_model_name: str = "xgboost",
+        production_model_name: str = "ridge",
     ):
         self.blob_manager = blob_manager
         self.production_model_name = production_model_name
