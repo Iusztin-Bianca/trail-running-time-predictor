@@ -26,6 +26,7 @@ _SHAP_FEATURE_DESCRIPTIONS = {
     "uphill_cost":            "Uphill cost: distance * (1 + 6 * gradient) — 0 for non-uphill segments",
     "downhill_cost":          "Downhill cost: distance * (1 + 6 * |gradient|) — 0 for non-downhill segments",
     "cumulative_elevation":   "Cumulative elevation gain from activity start to end of this segment (m) — proxy for accumulated fatigue",
+    "cumulative_distance":    "Cumulative distance from activity start to end of this segment (m) — proxy for accumulated fatigue",
     "segment_energy_cost":    "Minetti energy cost (J/kg): 155.4*g^5 - 30.4*g^4 - 43.3*g^3 + 46.3*g^2 + 19.5*g + 3.6, multiplied by distance — validated biomechanical formula for running on slopes",
     "is_race":                "1 if parent activity is a race, 0 otherwise — captures intentional maximum effort",
     "is_easy":                "1 if parent activity is a recovery run, 0 otherwise — captures intentional low effort"

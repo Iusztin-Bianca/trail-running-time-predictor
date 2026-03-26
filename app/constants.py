@@ -37,3 +37,7 @@ STRAVA_WORKOUT_TYPE_RACE = 1
 IS_RACE = 1
 IS_EASY = 1
 IS_NOT = 0
+
+# GPX downsampling thresholds (applied only for long races to reduce latency)
+GPX_DOWNSAMPLE_THRESHOLD_M = 30_000   # Minimum race distance (m) to trigger downsampling
+GPX_MAX_POINTS = 5000                  # Maximum GPS points after downsampling

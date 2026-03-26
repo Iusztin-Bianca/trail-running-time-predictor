@@ -11,6 +11,8 @@ from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 
+from app.constants import GPX_DOWNSAMPLE_THRESHOLD_M, GPX_MAX_POINTS
+
 
 @dataclass(frozen=True)
 class Point:
@@ -144,5 +146,17 @@ class PointExtractor:
             raise ValueError(
                 f"GPX file contains insufficient valid points (found {len(points)}, need at least 2)"
             )
+
+        # Downsample only for long races (>30 km) to improve latency (GPX_DOWNSAMPLE_THRESHOLD_M=30000)
+        # Gradient window is 30m — one point every ~10m is more than sufficient.
+        # Keeps the last point to preserve total distance accuracy.
+        # GPX_MAX_POINTS = 5000 
+        total_distance_m = gpx.length_2d()
+        if total_distance_m > GPX_DOWNSAMPLE_THRESHOLD_M and len(points) > GPX_MAX_POINTS:
+            stride = len(points) // GPX_MAX_POINTS
+            last = points[-1]
+            points = points[::stride]
+            if points[-1] is not last:
+                points = list(points) + [last]
 
         return points
