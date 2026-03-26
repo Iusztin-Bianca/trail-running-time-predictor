@@ -380,6 +380,9 @@ class SegmentFeatureExtractor:
         alt_diffs = df.iloc[0:end_idx + 1]['altitude_m'].diff().dropna()
         cumulative_elevation = round(float(alt_diffs[alt_diffs > 0].sum()), 1)
 
+        # Cumulative distance from activity start to end of this segment
+        cumulative_distance = round(float(df.iloc[end_idx]['distance_m']), 3)
+
         segment_pace_mps = round(segment_distance_m / segment_time_sec, 4) if segment_time_sec > 0 else 1.0
 
         return {
@@ -398,6 +401,7 @@ class SegmentFeatureExtractor:
             'uphill_cost': round(uphill_cost, 3),
             'downhill_cost': round(downhill_cost, 3),
             'cumulative_elevation': round(cumulative_elevation, 3),
+            'cumulative_distance': cumulative_distance,
             'segment_energy_cost': segment_energy_cost,
         }
 
