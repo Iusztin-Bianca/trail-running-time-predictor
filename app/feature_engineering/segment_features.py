@@ -382,9 +382,6 @@ class SegmentFeatureExtractor:
 
         segment_pace_mps = round(segment_distance_m / segment_time_sec, 4) if segment_time_sec > 0 else 1.0
 
-        is_steep_uphill = 1 if terrain_type == 'uphill' and abs(avg_gradient) >= 0.3 else 0
-        is_steep_downhill = 1 if terrain_type == 'downhill' and abs(avg_gradient) >= 0.3 else 0
-
         return {
             'segment_distance_m': round(segment_distance_m, 3),
             'segment_time_sec': round(segment_time_sec, 3),
@@ -402,8 +399,6 @@ class SegmentFeatureExtractor:
             'downhill_cost': round(downhill_cost, 3),
             'cumulative_elevation': round(cumulative_elevation, 3),
             'segment_energy_cost': segment_energy_cost,
-            'is_steep_uphill': is_steep_uphill,
-            'is_steep_downhill': is_steep_downhill,
         }
 
 
