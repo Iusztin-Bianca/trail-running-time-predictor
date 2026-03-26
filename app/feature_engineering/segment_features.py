@@ -116,41 +116,37 @@ class SegmentFeatureExtractor:
         return pd.DataFrame(data)
 
     def _compute_gradients(self, df: pd.DataFrame) -> np.ndarray:
-        """Compute gradient over 30m windows( each point will have a gradient 
-        computed on a window of 30m before it)
+        """Compute gradient over 30m windows (each point uses the window [dist_i, dist_i + 30m]).
+
+        Vectorized with np.searchsorted — O(n log n) instead of O(n²).
 
         Args:
             df: DataFrame with all the points(distance_m, altitude_m)
 
         Returns:
-            Array of gradients for each point 
+            Array of gradients for each point
         """
-        gradients = []
+        distances = df['distance_m'].values
+        altitudes = df['altitude_m'].values
+        n = len(distances)
 
-        for i in range(len(df)):
-            # Find points within 30m window ahead
-            current_dist = df.iloc[i]['distance_m']
-            window_mask = (df['distance_m'] >= current_dist) & (df['distance_m'] <= current_dist + self.GRADIENT_WINDOW_M)
+        # For each point i, find the last index j where distances[j] <= distances[i] + 30m
+        right_indices = np.searchsorted(distances, distances + self.GRADIENT_WINDOW_M, side='right') - 1
+        right_indices = np.minimum(right_indices, n - 1)
 
-            window_df = df[window_mask]
+        has_window = right_indices > np.arange(n)
+        dist_changes = distances[right_indices] - distances
+        elev_changes = altitudes[right_indices] - altitudes
 
-            if len(window_df) < 2:
-                # Not enough points in window, use previous gradient or 0
-                gradients.append(gradients[-1] if gradients else 0.0)
-                continue
+        safe_dist = np.where(dist_changes > 0, dist_changes, 1.0)
+        gradients = np.where(has_window & (dist_changes > 0), elev_changes / safe_dist, 0.0)
 
-            # Calculate gradient over window
-            elev_change = window_df.iloc[-1]['altitude_m'] - window_df.iloc[0]['altitude_m']
-            dist_change = window_df.iloc[-1]['distance_m'] - window_df.iloc[0]['distance_m']
+        # Forward-fill for points with no 30m window ahead ( only near end of track)
+        for i in range(1, n):
+            if not has_window[i]:
+                gradients[i] = gradients[i - 1]
 
-            if dist_change > 0:
-                gradient = elev_change / dist_change
-            else:
-                gradient = 0.0
-
-            gradients.append(gradient)
-
-        return np.array(gradients)
+        return gradients
 
     def _create_segments(self, df: pd.DataFrame, gradients: np.ndarray) -> List[Tuple[int, int, str]]:
         """Create segments based on terrain type changes.

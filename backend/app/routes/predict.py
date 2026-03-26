@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-
 @router.post("/predict-from-gpx", response_model=PredictionResponse)
 async def predict_from_gpx(
     request: Request,
