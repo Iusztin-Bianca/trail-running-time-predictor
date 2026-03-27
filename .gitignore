@@ -44,4 +44,9 @@ nul
 AzureCLI.msi
 *.msi
 
-*.md
+# Root-level stray files
+/package.json
+/package-lock.json
+
+# Local data files
+backend/date_strava.txt

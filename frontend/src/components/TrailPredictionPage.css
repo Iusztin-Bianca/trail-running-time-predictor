@@ -1,0 +1,253 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Full-page background image */
+.page {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  font-family: Arial, sans-serif;
+}
+
+.heroImage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  z-index: 0;
+}
+
+.heroOverlay {
+  display: none;
+}
+
+/* Title floating above card */
+.heroText {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  margin-bottom: 16px;
+  padding: 14px 28px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 14px;
+  backdrop-filter: blur(4px);
+}
+
+.heroTitle {
+  font-size: 28px;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  margin: 0 0 6px 0;
+}
+
+.heroSubtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+  margin: 0;
+}
+
+/* Card at the bottom, over the image */
+.card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 380px;
+  background-color: rgba(232, 220, 200, 0.82);
+  backdrop-filter: blur(8px);
+  border-radius: 0 0 16px 16px;
+  border-top: 4px solid #4a90e2;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  padding: 28px 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.uploadBox {
+  width: 100%;
+  border: 2px dashed #4a90e2;
+  border-radius: 12px;
+  padding: 22px;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.2s;
+}
+
+.uploadBox:hover {
+  background-color: rgba(74, 144, 226, 0.08);
+}
+
+.uploadContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: #555;
+  font-size: 14px;
+}
+
+.icon {
+  font-size: 28px;
+}
+
+.button {
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  background-color: #4a90e2;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button:hover:not(:disabled) {
+  background-color: #357abd;
+}
+
+.button:disabled {
+  background-color: #a0b8d8;
+  cursor: not-allowed;
+}
+
+.errorText {
+  color: #d9534f;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Result modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modalCard {
+  background-color: #fff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 480px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.modalHeader {
+  width: 100%;
+  background: linear-gradient(135deg, #4a90e2, #2c6fba);
+  padding: 28px 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.modalTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 0;
+}
+
+.modalTime {
+  font-size: 44px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  letter-spacing: -1px;
+}
+
+.modalBody {
+  width: 100%;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.modalStats {
+  display: flex;
+  gap: 12px;
+}
+
+.statPill {
+  flex: 1;
+  background-color: #f4f6f9;
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.statValue {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.statLabel {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.elevationContainer {
+  width: 100%;
+}
+
+.elevationLabel {
+  font-size: 11px;
+  color: #aaa;
+  margin: 0 0 6px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.elevationSvg {
+  width: 100%;
+  height: 80px;
+  display: block;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #f4f6f9;
+}
+
+.modalSegments {
+  font-size: 12px;
+  color: #bbb;
+  text-align: center;
+}
+
+.modalFooter {
+  width: 100%;
+  padding: 0 28px 24px;
+}

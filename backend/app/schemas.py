@@ -7,7 +7,6 @@ class PredictionResponse(BaseModel):
     """Response schema for ML model predictions."""
     predicted_time_seconds: float = Field(gt=0, description="Predicted completion time in seconds")
     predicted_time_formatted: str = Field(description="Predicted time in human-readable format (e.g. '2h 05m 30s')")
-    num_segments: int = Field(gt=0, description="Number of terrain segments extracted from the GPX")
 
     @classmethod
     def from_seconds(cls, total_seconds: float, num_segments: int) -> "PredictionResponse":
@@ -21,6 +20,5 @@ class PredictionResponse(BaseModel):
             formatted = f"{minutes}m {seconds:02d}s"
         return cls(
             predicted_time_seconds= total_seconds,
-            predicted_time_formatted=formatted,
-            num_segments=num_segments,
+            predicted_time_formatted=formatted
         )
