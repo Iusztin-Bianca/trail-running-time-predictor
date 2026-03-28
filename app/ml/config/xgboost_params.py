@@ -15,14 +15,14 @@ class XGBoostParams:
     reg_lambda: float = 10           # L2 regularization
     random_state: int = 42
     gamma: float = 5
-    early_stopping_rounds: int = 0  # Stop if no improvement for 20 rounds
+    early_stopping_rounds: int = 20  # Stop if no improvement for 20 rounds
 
 
 # Search space for hyperparameter tuning
 # n_estimators excluded: with early stopping it's just a ceiling, not a meaningful tunable param
 XGBOOST_PARAM_GRID = {
     "n_estimators": [200, 500],
-    "max_depth": [2, 3, 4],
+    "max_depth": [2, 3],
     "learning_rate": [0.03, 0.05],
-    "min_child_weight": [1, 3],
+    "min_child_weight": [3, 5],
 }

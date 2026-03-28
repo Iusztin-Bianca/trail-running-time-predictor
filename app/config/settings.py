@@ -1,7 +1,4 @@
-from pathlib import Path
-from typing import List
 from pydantic_settings import BaseSettings
-
 
 class Settings(BaseSettings):
     """Centralized configuration for Trail Running Time Predictor

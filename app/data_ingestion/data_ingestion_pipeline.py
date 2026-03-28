@@ -1,12 +1,3 @@
-"""
-Pipeline for fetching Strava running activities and extracting features for training.
-
-This pipeline:
-1. Fetches all "Run" and "TrailRun" activities from Strava with elevation gain >= 100m
-2. Extracts features from each activity using SegmentFeatureExtractor
-3. Stores is_race / is_easy binary features
-4. Saves all features to a parquet file for ML training
-"""
 import logging
 import pandas as pd
 from pathlib import Path
