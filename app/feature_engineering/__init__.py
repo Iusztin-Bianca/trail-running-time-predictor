@@ -1,10 +1,8 @@
-from .features import FeatureExtractor
-from .pipeline import FeatureEngineeringPipeline
+from .segment_features import SegmentFeatureExtractor
 from .point_extractor import Point, PointExtractor
 
 __all__ = [
-    "FeatureExtractor",
-    "FeatureEngineeringPipeline",
+    "SegmentFeatureExtractor",
     "Point",
     "PointExtractor"
 ]
