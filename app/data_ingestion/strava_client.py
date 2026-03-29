@@ -70,7 +70,3 @@ class StravaClient:
             "key_by_type": "true",
         }
         return self._make_request("GET", f"/activities/{activity_id}/streams", params=params)
-
-    def get_activity(self, activity_id: int) -> Dict:
-        """Fetch detailed activity data."""
-        return self._make_request("GET", f"/activities/{activity_id}")

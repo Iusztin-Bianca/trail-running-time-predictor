@@ -102,23 +102,6 @@ class BlobStorageManager:
             logger.error(f"Failed to download parquet from blob storage: {e}")
             raise
 
-    def blob_exists(self) -> bool:
-        """
-        Check if parquet blob exists in storage.
-
-        Returns:
-            True if blob exists, False otherwise
-        """
-        try:
-            blob_client = self.blob_service_client.get_blob_client(
-                container=self.container_name,
-                blob=self.blob_name
-            )
-            return blob_client.exists()
-        except Exception as e:
-            logger.error(f"Failed to check blob existence: {e}")
-            return False
-
     def get_last_activity_timestamp(self) -> Optional[int]:
         """
         Get the timestamp of the most recent activity in the parquet file.
@@ -484,30 +467,3 @@ class BlobStorageManager:
             Metadata dict or None if no model saved yet
         """
         return self._get_latest_version_info()
-
-    def list_raw_activities(self) -> list:
-        """
-        List all raw activity IDs in blob storage.
-
-        Returns:
-            List of activity IDs
-        """
-        try:
-            prefix = "raw/activities/"
-            blobs = self.container_client.list_blobs(name_starts_with=prefix)
-
-            activity_ids = []
-            for blob in blobs:
-                # Extract activity ID from blob name: raw/activities/{id}.json
-                filename = blob.name.replace(prefix, "").replace(".json", "")
-                try:
-                    activity_ids.append(int(filename))
-                except ValueError:
-                    continue
-
-            logger.info(f"Found {len(activity_ids)} raw activities in blob storage")
-            return activity_ids
-
-        except Exception as e:
-            logger.error(f"Failed to list raw activities: {e}")
-            return []

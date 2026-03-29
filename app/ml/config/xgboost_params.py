@@ -19,7 +19,6 @@ class XGBoostParams:
 
 
 # Search space for hyperparameter tuning
-# n_estimators excluded: with early stopping it's just a ceiling, not a meaningful tunable param
 XGBOOST_PARAM_GRID = {
     "n_estimators": [200, 500],
     "max_depth": [2, 3, 4],

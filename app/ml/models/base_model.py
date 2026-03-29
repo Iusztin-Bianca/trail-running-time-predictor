@@ -33,9 +33,6 @@ class BaseModel(ABC):
         """Make predictions on new data."""
         pass
 
-    def get_param_grid(self):
-        return self.hyperparameters
-    
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(name='{self.name}', fitted={self.is_fitted})"
 

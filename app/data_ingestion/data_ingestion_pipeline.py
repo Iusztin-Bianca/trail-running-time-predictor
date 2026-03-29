@@ -227,11 +227,6 @@ class DataIngestionPipeline:
                     failed += 1
                     continue
 
-                # Fetch detailed activity to get description for tehnic_terrain
-                #detailed = self.client.get_activity(activity_id)
-                #description = (detailed.get("description") or "").lower()
-                #tehnic_terrain = 1 if "tehnic" in description else 0
-
                 if not segment_features:
                     logger.warning(f"Skipping activity {activity_id}")
                     failed+=1
