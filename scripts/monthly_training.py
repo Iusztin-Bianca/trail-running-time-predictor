@@ -31,9 +31,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+LOCAL_MODEL_PATH = Path(__file__).parent / "backend" / "models" / "model_latest.joblib"
+PRODUCTION_MODEL_NAME = "ridge"
+
 
 def _retrain_and_save(blob_manager: BlobStorageManager) -> None:
-    """Train all models, run comparison, and persist new XGBoost version to Blob Storage."""
+    """Train all models, run comparison, and persist new version to Blob Storage and locally."""
+    import joblib
+
     logger.info("Starting model retraining...")
     splitter = TemporalSplitter()
     metrics = MetricsCalculator()
@@ -51,6 +56,13 @@ def _retrain_and_save(blob_manager: BlobStorageManager) -> None:
         logger.warning("Model comparison/SHAP skipped (non-critical): %s", e)
 
     ModelPersistenceService(blob_manager).save(model_results)
+
+    # Save model locally as fallback for local development (no Azure credentials needed)
+    production_result = model_results.get(PRODUCTION_MODEL_NAME)
+    if production_result:
+        LOCAL_MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump(production_result["model"], LOCAL_MODEL_PATH)
+        logger.info("Model saved locally at %s", LOCAL_MODEL_PATH)
 
     logger.info("Retraining complete!")
 
