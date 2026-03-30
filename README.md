@@ -90,6 +90,33 @@ where `g` is the signed gradient (positive = uphill, negative = downhill) and `d
 
 ## Project Structure
 
+```
+trail-running-time-predictor/
+├── app/                          # Core ML package (shared by backend & scripts)
+│   ├── config/                   # Settings (env vars via Pydantic)
+│   ├── data_ingestion/           # Strava API client & data pipeline
+│   ├── feature_engineering/      # GPX parsing & segment feature extraction
+│   └── ml/
+│       ├── config/               # Model hyperparameters (Ridge, XGBoost)
+│       ├── data/                 # Blob Storage manager & data splitting
+│       ├── evaluation/           # Metrics calculation
+│       ├── models/               # Ridge & XGBoost wrappers
+│       └── services/             # Trainer, predictor, hyperparameter tuner
+├── backend/
+│   ├── app/
+│   │   ├── routes/               # FastAPI endpoints (/predict-from-gpx, /health)
+│   │   ├── schemas/              # Pydantic request/response models
+│   │   └── main.py               # App entry point & model loading
+│   ├── models/                   # Local model fallback (model_latest.joblib)
+│   └── requirements.txt
+├── frontend/                     # React + TypeScript + Vite
+├── scripts/
+│   └── monthly_training.py       # Retraining script (runs via GitHub Actions)
+├── .github/workflows/
+│   └── monthly_training.yml      # Automated monthly retraining CI/CD
+├── docker-compose.yml
+└── pyproject.toml
+```
 
 
 
