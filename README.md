@@ -118,6 +118,61 @@ trail-running-time-predictor/
 └── pyproject.toml
 ```
 
+## Local Setup
+
+### Prerequisites
+- Python 3.12
+- Node.js 20+
+- Docker (optional)
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/Iusztin-Bianca/trail-running-time-predictor.git
+cd trail-running-time-predictor
+```
+
+### 2. Backend
+
+```bash
+cd backend
+python -m venv venv
+```
+
+#### Windows
+```bash
+venv\Scripts\activate
+```
+#### Linux/Mac
+```bash
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+Start the backend: 
+```bash
+uvicorn backend.app.main:app --reload
+```
+
+Note: No credentials needed to run the app — the pre-trained model is included at backend/models/model_latest.joblib and loaded automatically.
+
+Note: Strava and Azure credentials are only required if you want to retrain the model on your own Strava data.
+
+### 3. Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Retraining on your own data (optional)
+To retrain the model on your own Strava activities, create a `.env` file in the root directory with:
+- STRAVA_CLIENT_ID=your_client_id
+- STRAVA_CLIENT_SECRET=your_client_secret
+- STRAVA_REFRESH_TOKEN=your_refresh_token
+- AZURE_STORAGE_CONNECTION_STRING=your_connection_string
+- Then run `python scripts/monthly_training.py`.
+
+
 
 
 
