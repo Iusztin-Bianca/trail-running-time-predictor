@@ -1,9 +1,13 @@
 # Trail Running Time Predictor
 
-Machine learning web application that predicts trail running race completion times from GPX files, trained on real Strava data.
+Machine learning web application that predicts trail running race times from GPX files using segment-level regression trained on real Strava data.
 
 [![Monthly Training](https://github.com/Iusztin-Bianca/trail-running-time-predictor/actions/workflows/monthly_training.yml/badge.svg)](https://github.com/Iusztin-Bianca/trail-running-time-predictor/actions/workflows/monthly_training.yml) ![Python](https://img.shields.io/badge/python-3.12-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-0.127-green) ![scikit-learn](https://img.shields.io/badge/scikit--learn-1.8.0-orange)
 ![XGBoost](https://img.shields.io/badge/XGBoost-3.2.0-red)
+
+## Why This Project
+
+This project combines my interest in endurance sports with machine learning, focusing on real-world performance prediction using GPX data.
 
 ## Tech Stack
 
@@ -31,9 +35,11 @@ Machine learning web application that predicts trail running race completion tim
 ### Inference (Prediction)
 1. User uploads a GPX file
 2. Route is split into segments (of maximum 1000m) by terrain type (uphill / downhill / flat)
-3. For each segment, 16 features are extracted (gradient, distance, elevation, energy cost, etc.)
+3. For each segment, 17 features are extracted (gradient, distance, elevation, energy cost, etc.)
 4. Model predicts time for each segment independently
 5. Segment times are summed → total predicted race time
+
+Instead of predicting total race time directly, the model predicts time at segment level and aggregates results.
 
 ### ML Pipeline
 - **Training data**: personal activities from Strava application (trail runs with elevation ≥ 150m)
@@ -105,6 +111,8 @@ Despite XGBoost showing better training metrics, Ridge consistently achieves low
 
 Ridge, being a regularized linear model, generalizes better across this diverse range of activities.
 
+Trained on **68 activities** and **2,565 segments** (segment-level regression multiplies the effective dataset size ~38x per activity).
+
 | Model | Test MAE | Test MAPE | Test R² |
 |---|---|---|---|
 | **Ridge** ✓ | **503s** | **7.0%** | **0.972** |
@@ -113,6 +121,20 @@ Ridge, being a regularized linear model, generalizes better across this diverse 
 > Last updated: March 2026. Current metrics are always available in app/ml/evaluation/model_draft_comparison.json.
 
 As the dataset grows over time with more monthly training runs, XGBoost is expected to eventually outperform Ridge — tree-based models typically benefit more from larger datasets.
+
+## Performance
+
+Prediction latency is dominated by **GPX parsing and feature extraction**, not model inference — Ridge is a linear model and predicts in milliseconds regardless of route length.
+
+| Step | Approximate time |
+|---|---|
+| GPX parsing & segmentation + feature extraction(per segment) | 1-2s |
+| Model inference (all segments) | < 30ms |
+| **Total (typical GPX file)** | **~1–3s** |
+
+Initial profiling showed 7–8s response times for long races. This was reduced to under 3s through **GPX downsampling** (reducing point density before parsing) and **vectorized feature extraction** (replacing per-segment loops with numpy operations).
+
+The model is loaded once at startup and kept in memory — there is no per-request loading overhead.
 
 ## Limitations
 
@@ -190,7 +212,7 @@ pip install -r requirements.txt
 
 Start the backend: 
 ```bash
-uvicorn backend.app.main:app --reload
+uvicorn app.main:app --reload
 ```
 
 Note: No credentials needed to run the app — the pre-trained model is included at backend/models/model_latest.joblib and loaded automatically.
