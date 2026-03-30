@@ -93,6 +93,41 @@ $$E = (155.4g^5 - 30.4g^4 - 43.3g^3 + 46.3g^2 + 19.5g + 3.6) \times d$$
 
 where `g` is the signed gradient (positive = uphill, negative = downhill) and `d` is segment distance in meters.
 
+### Model Evaluation
+
+#### Why Ridge over XGBoost?
+
+Both models were tuned via **grid search with TimeSeriesSplit cross-validation** to find the optimal hyperparameters (Ridge: `alpha`; XGBoost: `learning_rate`, `max_depth`, `n_estimators`, `min_child_weight`).
+
+The dataset covers a wide variety of races — from short technical mountain runs to long ultra-trails — which introduces high variance in activity duration and terrain profile. 
+
+Despite XGBoost showing better training metrics, Ridge consistently achieves lower test MAE and MAPE — a sign that XGBoost **overfits** on the small dataset even after tuning(difference in metrics between test/train sets).
+
+Ridge, being a regularized linear model, generalizes better across this diverse range of activities.
+
+| Model | Test MAE | Test MAPE | Test R² |
+|---|---|---|---|
+| **Ridge** ✓ | **503s** | **7.0%** | **0.972** |
+| XGBoost | 626s | 9.2% | 0.962 |
+
+> Last updated: March 2026. Current metrics are always available in app/ml/evaluation/model_draft_comparison.json.
+
+As the dataset grows over time with more monthly training runs, XGBoost is expected to eventually outperform Ridge — tree-based models typically benefit more from larger datasets.
+
+## Limitations
+
+- **Small dataset**: trained on one athlete's Strava activities — predictions may be less accurate for runners with very different profiles (predictions reflect that runner's fitness and style)
+- **No weather, technical terrain or fatigue modeling**: conditions like heat, wind, rain, rocky terrain or accumulated fatigue are not captured
+- **GPX quality**: accuracy depends on GPS signal quality and elevation data in the uploaded file
+
+## Future Improvements
+
+- Collect more training data to improve generalization
+- Add terain features (rocks, scrambling sections)
+- Model fatigue explicitly ( ex: volume of training in the week before the race)
+- Support multi-runner profiles or user-specific calibration
+
+
 ## Project Structure
 
 ```
