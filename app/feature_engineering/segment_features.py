@@ -303,6 +303,7 @@ class SegmentFeatureExtractor:
         is_race: int,
         is_easy: int,
         gradients: np.ndarray = None,
+        cumulative_elevation_arr: np.ndarray = None,
     ) -> Dict[str, float]:
         """Extract features for a single segment.
 
@@ -377,8 +378,11 @@ class SegmentFeatureExtractor:
         segment_energy_cost = round(energy_cost_per_m * segment_distance_m, 3)
 
         # Cumulative elevation gain from activity start to end of this segment
-        alt_diffs = df.iloc[0:end_idx + 1]['altitude_m'].diff().dropna()
-        cumulative_elevation = round(float(alt_diffs[alt_diffs > 0].sum()), 1)
+        if cumulative_elevation_arr is not None:
+            cumulative_elevation = round(float(cumulative_elevation_arr[end_idx]), 1)
+        else:
+            alt_diffs = df.iloc[0:end_idx + 1]['altitude_m'].diff().dropna()
+            cumulative_elevation = round(float(alt_diffs[alt_diffs > 0].sum()), 1)
 
         # Cumulative distance from activity start to end of this segment
         cumulative_distance = round(float(df.iloc[end_idx]['distance_m']), 3)
@@ -434,6 +438,10 @@ class SegmentFeatureExtractor:
         segments = self._merge_short_segments(segments, df)
         segments = self._split_long_segments(segments, df)
 
+        # Precompute cumulative elevation gain array once — O(n) instead of O(n²) per segment
+        alt_diffs = df['altitude_m'].diff().fillna(0)
+        cumulative_elevation_arr = alt_diffs.clip(lower=0).cumsum().values
+
         logger.info(f"Created {len(segments)} segments from {len(points)} points.")
 
         segment_features = []
@@ -441,6 +449,7 @@ class SegmentFeatureExtractor:
             features = self._extract_segment_features(
                 df, start_idx, end_idx, terrain_type, is_race, is_easy,
                 gradients=gradients,
+                cumulative_elevation_arr=cumulative_elevation_arr,
             )
 
             # Drop GPS stop artifacts: short segments (<100m) with implausibly slow pace
