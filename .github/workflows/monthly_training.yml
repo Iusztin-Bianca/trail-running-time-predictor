@@ -39,6 +39,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add backend/models/model_latest.joblib
-          git diff --staged --quiet || git commit -m "chore: update trained model [skip ci]"
+          git add backend/models/model_latest.joblib app/ml/evaluation/model_draft_comparison.json
+          git diff --staged --quiet || git commit -m "chore: update trained model and comparison results [skip ci]"
           git push

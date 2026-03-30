@@ -118,8 +118,6 @@ class SegmentFeatureExtractor:
     def _compute_gradients(self, df: pd.DataFrame) -> np.ndarray:
         """Compute gradient over 30m windows (each point uses the window [dist_i, dist_i + 30m]).
 
-        Vectorized with np.searchsorted — O(n log n) instead of O(n²).
-
         Args:
             df: DataFrame with all the points(distance_m, altitude_m)
 
@@ -438,7 +436,6 @@ class SegmentFeatureExtractor:
         segments = self._merge_short_segments(segments, df)
         segments = self._split_long_segments(segments, df)
 
-        # Precompute cumulative elevation gain array once — O(n) instead of O(n²) per segment
         alt_diffs = df['altitude_m'].diff().fillna(0)
         cumulative_elevation_arr = alt_diffs.clip(lower=0).cumsum().values
 
@@ -458,12 +455,12 @@ class SegmentFeatureExtractor:
 
             # Cap unrealistically long segment times >20min (GPS stoppages within a segment)
             # Try to eliminate the stationary times
-            # *For steep or technic uphill/downhill (with gradient > 30%), we suppose that 
+            # For very steep or technic uphill/downhill (with gradient > 30%), we suppose that 
             # a person could run/power hike 1000m in maximum 25 de minutes
             # 1000m.......25min
             # seg_distance....seg_time => seg_time can be maximum seg_distance* 25/1000 =>
             # we limit the segment time to this value
-            # *Also for a terrain that is not that steep/techinal => we suppose that a person 
+            # Also for a terrain that is not that steep/techinal => we suppose that a person 
             # can run that segment in maximum 20 minutes(this is the pesimistic case)
             if features['segment_time_sec'] > 1200:
                 if features['avg_gradient'] >= 0.3:

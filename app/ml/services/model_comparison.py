@@ -3,8 +3,11 @@
 import json
 import logging
 from datetime import datetime
+from pathlib import Path
 
 import pandas as pd
+
+LOCAL_COMPARISON_PATH = Path(__file__).parent.parent / "evaluation" / "model_draft_comparison.json"
 
 from app.constants import DEFAULT_EXCLUDE_COLUMNS
 from app.ml.evaluation.shap_analyzer import SHAPAnalyzer
@@ -39,7 +42,7 @@ class ModelComparisonService:
     This service receives the training data and model results, then:
       - Computes SHAP feature importance for each model
       - Builds a structured comparison dict (metrics + best model selection)
-      - Saves results to results/model_draft_comparison.json (local) or Blob Storage
+      - Saves results to results/model_draft_comparison.json (local) and on Blob Storage
       - Appends a new entry to results/models_compare_history.json (local) or Blob Storage
 
     Args:
@@ -73,7 +76,8 @@ class ModelComparisonService:
         # 2. Build comparison dict and pick the best model
         comparison = self._build_comparison(df, model_results)
 
-        # 3. Save results to Blob Storage
+        # 3. Save results locally and to Blob Storage
+        self._save_results_locally(comparison)
         self._save_results_to_blob(comparison)
         self._append_to_history_blob(comparison)
 
@@ -105,9 +109,7 @@ class ModelComparisonService:
 
         for name, result in model_results.items():
             race_test  = result["test_metrics_race"]
-            seg_test   = result["test_metrics_segment"]
             race_train = result["train_metrics_race"]
-            seg_train  = result["train_metrics_segment"]
             shap_values = result.get("shap_importance", {})
 
             entry = {
@@ -127,14 +129,6 @@ class ModelComparisonService:
                         "can be a sign of overfitting!"
                     ),
                     **race_train,
-                },
-                "train_metrics_segment": {
-                    "note": (
-                        "Metrics computed at segment level(High value- acceptable because there are a lot of"
-                        "short segments in each race - the value is not really relevant) "
-                        "MAE/RMSE measured in seconds, R2 is between 0 and 1."
-                    ),
-                    **seg_train,
                 },
                 "test_metrics_race": {
                     "note": (
@@ -174,6 +168,12 @@ class ModelComparisonService:
         logger.info("Best model: %s (Race Test MAE: %.1fs)", best_name, best_mae)
 
         return comparison
+
+    def _save_results_locally(self, comparison: dict) -> None:
+        """Save latest comparison results to local file."""
+        LOCAL_COMPARISON_PATH.parent.mkdir(parents=True, exist_ok=True)
+        LOCAL_COMPARISON_PATH.write_text(json.dumps(comparison, indent=2, default=str), encoding="utf-8")
+        logger.info("Saved model_draft_comparison.json locally at %s", LOCAL_COMPARISON_PATH)
 
     def _save_results_to_blob(self, comparison: dict) -> None:
         """Upload latest comparison results to Blob Storage."""

@@ -18,39 +18,13 @@ Machine learning web application that predicts trail running race completion tim
 
 ## Demo
 
-![App screenshot](docs/screenshots/main_page.PNG)
-![Prediction result](docs/screenshots/prediction_modal.PNG)
+![App screenshot](docs/main_page.PNG)
+![Prediction result](docs/prediction_modal.PNG)
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────┐
-│           Frontend (React + Vite)        │
-│         Upload GPX  │  View prediction   │
-└─────────────────────┬───────────────────┘
-                      │ HTTP POST /predict-from-gpx
-                      ▼
-┌─────────────────────────────────────────┐
-│           Backend (FastAPI)              │
-│  PointExtractor → SegmentExtractor →    │
-│  Feature Engineering → Model.predict() │
-└─────────────────────┬───────────────────┘
-                      │ startup only
-          ┌───────────┴───────────┐
-          ▼                       ▼
-┌─────────────────┐   ┌─────────────────────┐
-│  Azure Blob     │   │  Local Fallback      │
-│  Storage        │   │  backend/models/     │
-│  (model + data) │   │  model_latest.joblib │
-└─────────────────┘   └─────────────────────┘
-          ▲
-          │ monthly retrain
-┌─────────────────────────────────────────┐
-│        GitHub Actions                    │
-│  Strava API → Train → Save to Blob +    │
-│  commit model to repo                   │
-└─────────────────────────────────────────┘
-```
+
+![App screenshot](docs/project_architecture.PNG)
 
 ## How It Works
 
@@ -202,6 +176,10 @@ To retrain the model on your own Strava activities, create a `.env` file in the 
 - STRAVA_REFRESH_TOKEN=your_refresh_token
 - AZURE_STORAGE_CONNECTION_STRING=your_connection_string
 - Then run `python scripts/monthly_training.py`.
+
+## License
+
+MIT License — feel free to use, fork, and adapt this project.
 
 
 
