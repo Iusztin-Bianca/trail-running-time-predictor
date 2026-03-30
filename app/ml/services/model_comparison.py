@@ -70,8 +70,12 @@ class ModelComparisonService:
         X_df = df[feature_cols].fillna(0)
 
         for model_name, result in model_results.items():
-            result["shap_importance"] = self.shap_analyzer.analyze(result["model"], X_df)
-            logger.info("SHAP computed for %s.", model_name)
+            try:
+                result["shap_importance"] = self.shap_analyzer.analyze(result["model"], X_df)
+                logger.info("SHAP computed for %s.", model_name)
+            except Exception as e:
+                logger.warning("SHAP failed for %s (non-critical): %s", model_name, e)
+                result["shap_importance"] = {}
 
         # 2. Build comparison dict and pick the best model
         comparison = self._build_comparison(df, model_results)
