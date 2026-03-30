@@ -21,6 +21,37 @@ Machine learning web application that predicts trail running race completion tim
 ![App screenshot](docs/screenshots/main_page.PNG)
 ![Prediction result](docs/screenshots/prediction_modal.PNG)
 
+## Architecture
+
+```
+┌─────────────────────────────────────────┐
+│           Frontend (React + Vite)        │
+│         Upload GPX  │  View prediction   │
+└─────────────────────┬───────────────────┘
+                      │ HTTP POST /predict-from-gpx
+                      ▼
+┌─────────────────────────────────────────┐
+│           Backend (FastAPI)              │
+│  PointExtractor → SegmentExtractor →    │
+│  Feature Engineering → Model.predict() │
+└─────────────────────┬───────────────────┘
+                      │ startup only
+          ┌───────────┴───────────┐
+          ▼                       ▼
+┌─────────────────┐   ┌─────────────────────┐
+│  Azure Blob     │   │  Local Fallback      │
+│  Storage        │   │  backend/models/     │
+│  (model + data) │   │  model_latest.joblib │
+└─────────────────┘   └─────────────────────┘
+          ▲
+          │ monthly retrain
+┌─────────────────────────────────────────┐
+│        GitHub Actions                    │
+│  Strava API → Train → Save to Blob +    │
+│  commit model to repo                   │
+└─────────────────────────────────────────┘
+```
+
 ## How It Works
 
 ### Inference (Prediction)
