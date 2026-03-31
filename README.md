@@ -6,6 +6,14 @@ Supports real-time inference via FastAPI and automated monthly retraining via Gi
 [![Monthly Training](https://github.com/Iusztin-Bianca/trail-running-time-predictor/actions/workflows/monthly_training.yml/badge.svg)](https://github.com/Iusztin-Bianca/trail-running-time-predictor/actions/workflows/monthly_training.yml) ![Python](https://img.shields.io/badge/python-3.12-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-0.127-green) ![scikit-learn](https://img.shields.io/badge/scikit--learn-1.8.0-orange)
 ![XGBoost](https://img.shields.io/badge/XGBoost-3.2.0-red)
 
+## Live Demo
+
+**[trail-predictor.vercel.app](https://trail-predictor.vercel.app)**
+
+Upload a `.gpx` file from a trail run or race and get a predicted finish time broken down by segment.
+
+> Note: the backend runs on a free Render instance — the first request after inactivity may take ~50 seconds to wake up.
+
 ## Why This Project
 
 This project combines my interest in endurance sports with machine learning, focusing on real-world performance prediction using GPX data.
@@ -19,7 +27,7 @@ This project combines my interest in endurance sports with machine learning, foc
 | ML | scikit-learn, Ridge Regression, XGBoost, SHAP |
 | Storage | Azure Blob Storage |
 | CI/CD | GitHub Actions |
-| Containerization | Docker |
+| Hosting | Render (backend), Vercel (frontend) |
 
 ## Demo
 
@@ -177,7 +185,6 @@ trail-running-time-predictor/
 │   └── monthly_training.py       # Retraining script (runs via GitHub Actions)
 ├── .github/workflows/
 │   └── monthly_training.yml      # Automated monthly retraining CI/CD
-├── docker-compose.yml
 └── pyproject.toml
 ```
 
