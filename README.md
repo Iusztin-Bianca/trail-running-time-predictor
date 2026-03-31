@@ -1,6 +1,7 @@
 # Trail Running Time Predictor
 
 Machine learning web application that predicts trail running race times from GPX files using segment-level regression trained on real Strava data.
+Supports real-time inference via FastAPI and automated monthly retraining via GitHub Actions.
 
 [![Monthly Training](https://github.com/Iusztin-Bianca/trail-running-time-predictor/actions/workflows/monthly_training.yml/badge.svg)](https://github.com/Iusztin-Bianca/trail-running-time-predictor/actions/workflows/monthly_training.yml) ![Python](https://img.shields.io/badge/python-3.12-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-0.127-green) ![scikit-learn](https://img.shields.io/badge/scikit--learn-1.8.0-orange)
 ![XGBoost](https://img.shields.io/badge/XGBoost-3.2.0-red)
@@ -27,8 +28,7 @@ This project combines my interest in endurance sports with machine learning, foc
 
 ## Architecture
 
-
-![App screenshot](docs/project_architecture.PNG)
+![Architecture](docs/project_architecture.png)
 
 ## How It Works
 
@@ -46,7 +46,8 @@ Instead of predicting total race time directly, the model predicts time at segme
 - **Approach**: segment-level regression — each segment is one training observation, dramatically increasing dataset size
 - **Model**: Ridge Regression (chosen over XGBoost due to better generalization on small datasets)
 - **Retraining**: automated monthly via GitHub Actions → new model saved to Azure Blob Storage + committed to repo as fallback
-  **Feature importance (SHAP analysis - the 5 most significant features)**
+
+#### Feature importance (SHAP analysis - the 5 most significant features)**
 
 | Rank | Feature | SHAP Value |
 |---|---|---|
@@ -91,7 +92,7 @@ Each segment is described by 17 features:
 |---|---|---|
 | `uphill_cost` | `distance × (1 + 6 × gradient)` | Extra effort penalty for climbing |
 | `downhill_cost` | `distance × (1 + 6 × \|gradient\|)` | Braking effort penalty for descending |
-| `segment_energy_cost` | Minetti et al. (2002) | Metabolic energy cost (J/kg) per segment |
+| `segment_energy_cost` | Minetti formula | Metabolic energy cost (J/kg) per segment |
 
 The Minetti formula models the metabolic cost of running on a slope:
 
@@ -107,7 +108,7 @@ Both models were tuned via **grid search with TimeSeriesSplit cross-validation**
 
 The dataset covers a wide variety of races — from short technical mountain runs to long ultra-trails — which introduces high variance in activity duration and terrain profile. 
 
-Despite XGBoost showing better training metrics, Ridge consistently achieves lower test MAE and MAPE — a sign that XGBoost **overfits** on the small dataset even after tuning(difference in metrics between test/train sets).
+Despite XGBoost showing better training metrics, Ridge consistently achieves lower test MAE and MAPE — a sign that XGBoost **overfits** on the small dataset even after tuning (as seen by the gap between train and test metrics).
 
 Ridge, being a regularized linear model, generalizes better across this diverse range of activities.
 
