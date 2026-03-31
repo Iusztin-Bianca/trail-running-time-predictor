@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     azure_storage_container_name: str = "training-data"
     azure_parquet_blob_name: str = "strava_training_features.parquet"
 
+    # CORS Configuration
+    allowed_origins: str = "http://localhost:5173,http://localhost:5174"
+
     # Pipeline Settings
     strava_activities_per_page: int = 200
     min_elevation_gain_meters: int = 100
