@@ -8,7 +8,7 @@ Supports real-time inference via FastAPI and automated monthly retraining via Gi
 
 ## Live Demo
 
-**[trail-predictor.vercel.app](https://trail-predictor.vercel.app)**
+**[Live application](https://trail-predictor.vercel.app)**
 
 Upload a `.gpx` file from a trail run or race and get a predicted finish time broken down by segment.
 
