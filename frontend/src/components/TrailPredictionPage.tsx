@@ -78,7 +78,7 @@ export default function TrailPredictionPage() {
           />
           <div className="uploadContent">
             <div className="icon">📁</div>
-            <span>{gpxFile ? gpxFile.name : "Upload a GPX file"}</span>
+            <span>{gpxFile ? gpxFile.name : "Upload a GPX file of your planned route (export from Strava / Garmin)"}</span>
           </div>
         </label>
 
