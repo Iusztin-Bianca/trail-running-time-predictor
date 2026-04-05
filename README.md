@@ -1,7 +1,7 @@
 # Trail Running Time Predictor
 
 Machine learning web application that predicts trail running race times from GPX files using segment-level regression trained on real Strava data.
-Supports real-time inference via FastAPI and automated monthly retraining via GitHub Actions.
+Supports real-time inference via FastAPI and automated monthly retraining via GitHub Actions on new real-time strava data.
 
 [![Monthly Training](https://github.com/Iusztin-Bianca/trail-running-time-predictor/actions/workflows/monthly_training.yml/badge.svg)](https://github.com/Iusztin-Bianca/trail-running-time-predictor/actions/workflows/monthly_training.yml) ![Python](https://img.shields.io/badge/python-3.12-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-0.127-green) ![scikit-learn](https://img.shields.io/badge/scikit--learn-1.8.0-orange)
 ![XGBoost](https://img.shields.io/badge/XGBoost-3.2.0-red)
@@ -41,7 +41,7 @@ This project combines my interest in endurance sports with machine learning, foc
 ## How It Works
 
 ### Inference (Prediction)
-1. User uploads a GPX file
+1. User uploads a GPX file (race route file - it can be downloaded from Strava/Garmin apps)
 2. Route is split into segments (of maximum 1000m) by terrain type (uphill / downhill / flat)
 3. For each segment, 17 features are extracted (gradient, distance, elevation, energy cost, etc.)
 4. Model predicts time for each segment independently
